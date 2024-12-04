@@ -1,4 +1,4 @@
-package com.example.student.model;
+package src.extentions;
 
 import java.util.List;
 import java.util.Map;
