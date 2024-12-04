@@ -1,0 +1,68 @@
+// Updated Objects and Structure
+
+Obj Student = {
+    uuid: "unique student ID", // 6-digit positive integer as string for flexibility, range 000000-999999
+    grade: "student grade", // flexible to handle grades like "12 + 3" or just numeric
+    active_pass: Pass object | null, // Reference to an active pass object or null
+
+    schedule: {
+        1: Classroom object | null, // Using null for empty periods or no class
+        ...
+        8: [Classroom object, Classroom object | null] // Allow flexibility for labs or joint classes
+    },
+
+    name: Name object, // Simplified reference to Name object
+    permissions: [String, ...] // Custom permissions for flexibility (e.g., "request-pass", "edit-schedule")
+}
+
+Obj Teacher = {
+    uuid: "unique teacher ID", // Unique identifier for each teacher
+    name: Name object, // Reuse Name object for teachers
+    room: "main room number", // String, primary room for the teacher
+    subjects: [String, ...], // List of subjects taught by the teacher (e.g., "Math", "Science")
+    permissions: [String, ...], // Custom permissions (e.g., "approve-pass", "edit-classroom")
+    assigned_classes: [Classroom object, ...], // List of classrooms assigned to the teacher
+    active_passes: [Pass object, ...] // List of active passes issued by the teacher
+}
+
+Obj Admin = {
+    uuid: "unique admin ID", // Unique identifier for each admin
+    name: Name object, // Reuse Name object for admins
+    department: "department name", // String (e.g., "IT", "Student Services")
+    room: "main room number", // String, primary room for the teacher 
+    permissions: [String, ...], // Custom permissions (e.g., "manage-users", "override-pass")
+    managed_teachers: [Teacher object, ...], // List of teachers managed by this admin
+    active_passes: [Pass object, ...], // List of active passes managed or overseen by the admin
+    managed_students: [Student object, ...] // Optional: List of students overseen (e.g., discipline cases)
+}
+
+
+Obj Classroom = {
+    room: "room number", // String to allow formats like "101A" or "Lab 3"
+    name: "class name", // Class name, always a string
+    teachers: [Teacher object, ...] // Array of Teacher objects for multiple instructors
+}
+
+Obj Name = {
+    first: "first name", // String
+    last: "last name", // String
+    preferred: "preferred name" | null, // Preferred name or null
+    pronouns: "he/him" | "she/her" | "they/them" | custom string | null // Allow null or custom entries
+}
+
+
+
+Obj Pass = {
+    id: "unique pass ID", // Unique identifier for the pass, could be UUID
+    issued_by: Teacher object | Admin object, // Issuer of the pass
+    issued_to: Student object, // Recipient of the pass
+    purpose: "purpose of the pass" | null, // String describing the purpose
+    valid_from: DateTime, // Start time
+    valid_until: DateTime | null, // End time or null for indefinite
+    status: "active" | "expired" | "revoked", // Current status of the pass
+}
+
+
+// ---------------------------------------------------- ///
+
+/
