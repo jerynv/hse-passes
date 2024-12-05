@@ -1,30 +1,27 @@
-package src.extentions;
+package src.extensions;
 
 import java.util.List;
 
-public class Admin {
+public class Teacher {
     private String uuid;
         private Name name;
-        private String department;
         private String room;
+        private List<String> subjects;
         private List<String> permissions;
-        private List<Teacher> managedTeachers;
+        private List<Classroom> assignedClasses;
         private List<Pass> activePasses;
-        private List<Student> managedStudents;
 
         // Constructor
-        public Admin(String uuid, Name name, String department, String room, List<String> permissions, List<Teacher> managedTeachers, List<Pass> activePasses, List<Student> managedStudents) {
+        public Teacher(String uuid, Name name, String room, List<String> subjects, List<String> permissions, List<Classroom> assignedClasses, List<Pass> activePasses) {
             this.uuid = uuid;
             this.name = name;
-            this.department = department;
             this.room = room;
+            this.subjects = subjects;
             this.permissions = permissions;
-            this.managedTeachers = managedTeachers;
+            this.assignedClasses = assignedClasses;
             this.activePasses = activePasses;
-            this.managedStudents = managedStudents;
         }
 
-        
         // Getters and Setters
 
         public String getUuid() {
@@ -43,20 +40,20 @@ public class Admin {
             this.name = name;
         }
 
-        public String getDepartment() {
-            return department;
-        }
-
-        public void setDepartment(String department) {
-            this.department = department;
-        }
-
         public String getRoom() {
             return room;
         }
 
         public void setRoom(String room) {
             this.room = room;
+        }
+
+        public List<String> getSubjects() {
+            return subjects;
+        }
+
+        public void setSubjects(List<String> subjects) {
+            this.subjects = subjects;
         }
 
         public List<String> getPermissions() {
@@ -67,12 +64,12 @@ public class Admin {
             this.permissions = permissions;
         }
 
-        public List<Teacher> getManagedTeachers() {
-            return managedTeachers;
+        public List<Classroom> getAssignedClasses() {
+            return assignedClasses;
         }
 
-        public void setManagedTeachers(List<Teacher> managedTeachers) {
-            this.managedTeachers = managedTeachers;
+        public void setAssignedClasses(List<Classroom> assignedClasses) {
+            this.assignedClasses = assignedClasses;
         }
 
         public List<Pass> getActivePasses() {
@@ -82,13 +79,5 @@ public class Admin {
         public void setActivePasses(List<Pass> activePass
         ) {
             this.activePasses = activePasses;
-        }
-
-        public List<Student> getManagedStudents() {
-            return managedStudents;
-        }
-
-        public void setManagedStudents(List<Student> managedStudents) {
-            this.managedStudents = managedStudents;
         }
 }

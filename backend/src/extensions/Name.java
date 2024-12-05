@@ -1,4 +1,4 @@
-package src.extentions;
+package src.extensions;
 
 public class Name {
     private String first;

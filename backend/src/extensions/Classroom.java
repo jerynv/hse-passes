@@ -1,4 +1,4 @@
-package src.extentions;
+package src.extensions;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class Classroom {
             this.teachers = teachers;
         }
 
-        // Getters and Setters
+        // Getters and Setters∏
         public String getRoom() {
             return room;
         }

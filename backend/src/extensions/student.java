@@ -1,4 +1,4 @@
-package src.extentions;
+package src.extensions;
 
 import java.util.List;
 import java.util.Map;
