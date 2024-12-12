@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:hse_apps/pages/login.dart';
 import 'dart:async';
 
@@ -56,6 +57,15 @@ class _SignUpPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+        ),
+      ),
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Center(
         child: _isSigningIn
@@ -72,7 +82,7 @@ class _SignUpPageState extends State<SignupPage> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'Login Failed',
+                            'Sign Up Failed',
                             style: TextStyle(
                               color: isDarkMode ? Colors.white : Colors.black,
                               fontSize: 24,
@@ -80,48 +90,60 @@ class _SignUpPageState extends State<SignupPage> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text(
-                            'Invalid credentials. Please try again.',
-                            style: TextStyle(
-                              color: isDarkMode ? Colors.grey : Colors.black54,
-                              fontSize: 16,
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 210),
+                            child: Text(
+                              'Somthing went wrong, please try again',
+                              style: TextStyle(
+                                color:
+                                    isDarkMode ? Colors.grey : Colors.black54,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _loginFailed = false;
-                                _isSigningIn = false;
-                              });
-                            },
-                            child: Text('Back to Login'),
-                          ),
+                          SizedBox(
+                            width: 200,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _loginFailed = false;
+                                  _isSigningIn = false;
+                                });
+                              },
+                              child: Text(
+                                'Back',
+                                style: TextStyle(
+                                    color: isDarkMode
+                                        ? const Color.fromARGB(255, 255, 255, 255)
+                                        : const Color.fromARGB(255, 255, 255, 255)),
+                              ),
+                            ),
+                          )
                         ],
                       )
                     : //text saying loading and a circular progress indicator
-                      
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
 
-                          children: [
-                            Text(
-                              'Creating Account',
-                              style: TextStyle(
-                                color: isDarkMode ? Colors.white : Colors.black,
-                                fontSize: 20,
-
-                              ),
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Creating Account',
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 20,
                             ),
-                            SizedBox(height: 20),
-                            CircularProgressIndicator(
-                              color: Colors.blueAccent,
-                            ),
-                          ],
-                        )
-                      
-              )
+                          ),
+                          SizedBox(height: 20),
+                          CircularProgressIndicator(
+                            color: Colors.blueAccent,
+                          ),
+                        ],
+                      ))
             : SingleChildScrollView(
                 padding: EdgeInsets.all(24.0),
                 child: Column(
