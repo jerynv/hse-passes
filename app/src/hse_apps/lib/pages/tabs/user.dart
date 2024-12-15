@@ -1,37 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:hse_apps/widgets/theme_toggle.dart'; // Import for iOS-style widgets
+import 'package:hse_apps/pages/login.dart';
+import 'package:hse_apps/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
+// Import for iOS-style widgets
 
 class UserTab extends StatefulWidget {
-  final bool isDarkMode; // Optional: Pass initial theme state
-  final VoidCallback toggleTheme; // Optional: Pass theme toggle callback
-
-  const UserTab({this.isDarkMode = false, required this.toggleTheme});
+  const UserTab({super.key});
 
   @override
   State<UserTab> createState() => UsertabState();
 }
 
 class UsertabState extends State<UserTab> {
-  bool isDarkMode = false; // State variable for theme (optional)
-  void _toggleTheme() {
-    setState(() {
-      isDarkMode = !isDarkMode;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    isDarkMode = widget.isDarkMode; // Use passed value or default
-  }
-
   @override
   Widget build(BuildContext context) {
     // Leverage platform channels for platform-specific styling (optional)
     final brightness = Theme.of(context).brightness;
 
     return CupertinoPageScaffold(
+      backgroundColor: brightness == Brightness.dark
+          ? Colors.black
+          : Colors.grey[100], // Replace with your background color
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -41,12 +31,12 @@ class UsertabState extends State<UserTab> {
               // User Information (adapt to your use case)
               Row(
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 30.0,
                     backgroundImage: AssetImage(
                         'assets/logo.png'), // Replace with your asset path
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Text(
                       'admin', // Replace with actual username
@@ -61,30 +51,26 @@ class UsertabState extends State<UserTab> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Theme Toggle (adapt to your toggleTheme logic)
               //horizantally aling text end to end with a cupertino switch
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Light/Dark Mode',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
-                    onPressed: _toggleTheme,
-                  ),
-                ],
+              ListTile(
+                title: (Text(
+                  'Light/Dark Mode',
+                )),
+                trailing: Icon(
+                  brightness == Brightness.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                  color: brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                onTap: () {
+                  Provider.of<ThemeProvider>(context, listen: false)
+                      .toggleTheme();
+                },
               ),
 
               //divider
@@ -96,41 +82,43 @@ class UsertabState extends State<UserTab> {
               ),
 
               // Account Management (replace with your actions)
-              CupertinoListTile(
-                title: Text('Terms and Conditions'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: Text(
+                  'Terms and Conditions',
+                ),
+                trailing: Icon(Icons.arrow_circle_right_outlined),
                 onTap: () {
                   // Handle account management navigation
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('Privacy Policy'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('Privacy Policy'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   // Handle account management navigation
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('About'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('About'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   // Handle account management navigation
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('Rate Us'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('Rate Us'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   //rateing popup
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('Report a Bug'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('Report a Bug'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   // Handle account management navigation
                 },
@@ -143,30 +131,33 @@ class UsertabState extends State<UserTab> {
                 height: 40,
               ),
 
-              CupertinoListTile(
-                title: Text('Change Email'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('Change Email'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   // Handle account management navigation
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('Reset Password'),
-                trailing: Icon(CupertinoIcons.right_chevron),
+              ListTile(
+                title: const Text('Reset Password'),
+                trailing: const Icon(Icons.keyboard_arrow_right),
                 onTap: () {
                   // Handle account management navigation
                 },
               ),
 
-              CupertinoListTile(
-                title: Text('Logout'),
-                trailing: Icon(CupertinoIcons.power),
+              ListTile(
+                title: const Text('Logout'),
+                trailing: const Icon(Icons.logout),
                 onTap: () {
                   //send to login page
 
-                  Navigator.pushNamed(context, '/login');
-
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  );
                 },
               ),
             ],

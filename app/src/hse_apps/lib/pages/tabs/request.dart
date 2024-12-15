@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class RequestsTab extends StatefulWidget {
+  const RequestsTab({super.key});
+
   @override
   RequestState createState() => RequestState();
 }
@@ -84,61 +86,65 @@ class RequestState extends State<RequestsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     return Scaffold(
+      backgroundColor:
+          brightness == Brightness.dark ? Colors.black : Colors.grey[100],
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
         child: Column(
           children: [
-            TextField(
+            const TextField(
               decoration: InputDecoration(
                 labelText: 'Search Pass Types',
                 prefixIcon: Icon(Icons.search),
-
               ),
-                ),
+            ),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
                 children: filteredPassTypes.map((passType) {
-                  return Card(
-                    color: Colors.primaries[
-                        filteredPassTypes.indexOf(passType) %
-                            Colors.primaries.length],
-                    child: InkWell(
-                      onTap: () {
-                        // Handle tap action here
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              passType.icon,
-                              size: 48,
-                              color: Colors.white,
+                  return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        color: Colors.primaries[
+                            filteredPassTypes.indexOf(passType) %
+                                Colors.primaries.length],
+                        child: InkWell(
+                          onTap: () {
+                            // Handle tap action here
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  passType.icon,
+                                  size: 48,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  passType.description,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Pass. Name: ${passType.assName}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 8),
-                            Text(
-                              passType.description,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Pass. Name: ${passType.assName}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
+                      ));
                 }).toList(),
               ),
             ),

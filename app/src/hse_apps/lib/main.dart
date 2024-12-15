@@ -1,39 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:hse_apps/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'providers/theme_provider.dart';
+import 'theme/theme.dart';
 import 'pages/home.dart';
 import 'pages/signup.dart';
 import 'pages/login.dart';
 
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle( 
+            statusBarColor: Colors.transparent, 
+      )); 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+
+    ChangeNotifierProvider<ThemeProvider>(
+      create: (context) => ThemeProvider(),
       child: const MyApp(),
-    ),
+    )
+
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'Hse Passes',
       debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.themeMode,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
       initialRoute: '/',
+      theme: Provider.of<ThemeProvider>(context).themeData,
       routes: {
-        '/': (context) =>  LoginPage(),
-        '/login': (context) => LoginPage(),
-        '/signup': (context) => SignupPage(),
-        '/home': (context) => HomePage(),
+        '/': (context) =>  const LoginPage(),
       },
     );
   }
