@@ -39,7 +39,8 @@ class _HomePageState extends State<HomePage> {
           tabBackgroundColor: Colors.blueAccent.withOpacity(.2),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           tabs: _navButtons.map((navButton) {
-            return _buildNavButton(navButton.icon, navButton.text, navButton.index);
+            return _buildNavButton(
+                navButton.icon, navButton.text, navButton.index);
           }).toList(), // Convert Iterable to List
         ),
       ),

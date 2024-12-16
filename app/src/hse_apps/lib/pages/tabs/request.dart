@@ -84,43 +84,81 @@ class RequestState extends State<RequestsTab> {
     filteredPassTypes = passTypes; // Initialize with all pass types
   }
 
+  void filterPassTypes(String query) {
+    setState(() {
+      filteredPassTypes = passTypes
+          .where((passType) =>
+              passType.description.toLowerCase().contains(query.toLowerCase()) ||
+              passType.assName.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     return Scaffold(
       backgroundColor:
           brightness == Brightness.dark ? Colors.black : Colors.grey[100],
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
-        child: Column(
-          children: [
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Search Pass Types',
-                prefixIcon: Icon(Icons.search),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+          child: Column(
+            children: [
+              TextField(
+                onChanged: filterPassTypes, // Trigger filtering on input change
+                decoration: InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: Colors.blueAccent, width: 2),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.red, width: 10),
+                  ),
+                  labelText: 'Search Pass Types',
+                  focusColor: Colors.red,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  labelStyle: TextStyle(
+                    color: brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    backgroundColor: brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.grey[100],
+                  ),
+                ),
+                cursorColor:
+                    brightness == Brightness.dark ? Colors.white : Colors.black,
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView(
-                children: filteredPassTypes.map((passType) {
-                  return Card(
-                    elevation: 5,
-                    child:
-                      ListTile(
-                        
-                        contentPadding: const EdgeInsets.all(8),
-                        leading: Icon(passType.icon),
-                        title: Text(passType.description),
-                        subtitle: Text('Assigned to: ${passType.assName}'),
-                        onTap: () {},
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView(
+                  children: filteredPassTypes.map((passType) {
+                    return Card(
+                      color: brightness == Brightness.dark
+                          ? Colors.grey[900]
+                          : Colors.white,
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Icon(passType.icon),
+                            backgroundColor: Colors.blueAccent,
+                          ),
+                          title: Text(passType.description),
+                          subtitle: Text('Assigned to: ${passType.assName}'),
+                          onTap: () {},
+                        ),
                       ),
-                    
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
