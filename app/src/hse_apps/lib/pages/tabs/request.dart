@@ -100,51 +100,23 @@ class RequestState extends State<RequestsTab> {
                 prefixIcon: Icon(Icons.search),
               ),
             ),
+            const SizedBox(height: 16),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
+              child: ListView(
                 children: filteredPassTypes.map((passType) {
-                  return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        color: Colors.primaries[
-                            filteredPassTypes.indexOf(passType) %
-                                Colors.primaries.length],
-                        child: InkWell(
-                          onTap: () {
-                            // Handle tap action here
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  passType.icon,
-                                  size: 48,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  passType.description,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Pass. Name: ${passType.assName}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ));
+                  return Card(
+                    elevation: 5,
+                    child:
+                      ListTile(
+                        
+                        contentPadding: const EdgeInsets.all(8),
+                        leading: Icon(passType.icon),
+                        title: Text(passType.description),
+                        subtitle: Text('Assigned to: ${passType.assName}'),
+                        onTap: () {},
+                      ),
+                    
+                  );
                 }).toList(),
               ),
             ),
