@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hse_apps/pages/login.dart';
+import 'package:hse_apps/pages/verification.dart';
 import 'package:provider/provider.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 
@@ -43,32 +44,33 @@ class _SignUpPageState extends State<SignupPage> {
   }
 
   Future<void> _signup() async {
+  setState(() {
+    _isSigningIn = true;
+    _loginFailed = false;
+  });
+
+  await Future.delayed(const Duration(seconds: 2)); // Simulate server delay
+
+  final email = _emailController.text;
+  final studentID = _studentIDController.text;
+  final password = _passwordController.text;
+
+  if (email == 'admin' && studentID == '123456' && password == 'pass') {
+    // Navigate to Verification Page
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => VerificationPage(email: email), // Pass email for context
+      ),
+    );
+  } else {
     setState(() {
-      _isSigningIn = true;
-      _loginFailed = false;
+      _loginFailed = true;
+      _isSigningIn = false;
     });
-
-    await Future.delayed(const Duration(seconds: 2)); // Simulate server delay
-
-    final email = _emailController.text;
-    final studentID = _studentIDController.text;
-    final password = _passwordController.text;
-
-    if (email == 'admin' && studentID == '12345' && password == 'pass') {
-      // Navigate to Login Page
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const LoginPage(),
-        ),
-      );
-    } else {
-      setState(() {
-        _loginFailed = true;
-        _isSigningIn = false;
-      });
-    }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +171,7 @@ class _SignUpPageState extends State<SignupPage> {
         Text(
           'Hse Passes',
           style: TextStyle(
-            color: brightness == Brightness.dark ? Colors.white : Colors.black,
+            color: Colors.blueAccent,
             fontSize: 32,
             fontWeight: FontWeight.bold,
           ),

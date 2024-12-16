@@ -10,19 +10,26 @@ class PassesTab extends StatefulWidget {
 class _PassesTabState extends State<PassesTab> {
   // Mock Data for Pending Pass Requests
   List<PassRequest> pendingRequests = [
-    PassRequest('Mr. Smith', '5 min ago'),
-    PassRequest('Ms. Johnson', '10 min ago'),
+
   ];
 
   // Mock Data for Active Passes
   List<ActivePass> activePasses = [
-    ActivePass('Math Class', 'Mon, 25th June'),
-    ActivePass('Library', 'Tue, 26th June'),
+    ActivePass('Math Class', 'Mon, 25th June', false),
+    ActivePass('Library', 'Tue, 26th June', true)
   ];
 
-  void acceptRequest(int index) {
+  String _formatTime(TimeOfDay time) {
+    // Converts TimeOfDay to a string with AM/PM format
+    final localizations = MaterialLocalizations.of(context);
+    return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
+  }
+
+  void acceptRequest(int index, TimeOfDay time) {
+    final formattedTime = _formatTime(time); // AM/PM formatted time
     setState(() {
-      activePasses.add(ActivePass(pendingRequests[index].teacher, 'Today'));
+      activePasses.add(ActivePass(
+          pendingRequests[index].teacher, 'Today, $formattedTime', true));
       pendingRequests.removeAt(index);
     });
   }
@@ -33,15 +40,33 @@ class _PassesTabState extends State<PassesTab> {
     });
   }
 
+  void addPassRequest(String teacher) {
+    setState(() {
+      pendingRequests.add(PassRequest(teacher, 'Just now'));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'My Passes',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+        
+          children: [
+            
+            TextButton(
+                onPressed: () => addPassRequest("teacher"),
+                child: const Text(
+                  "My Passes",
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 24), 
+                  textAlign: TextAlign.left,
+                )),
+          ],
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Brightness.dark == Theme.of(context).brightness
+            ? Colors.black
+            : Colors.white,
         elevation: 0,
         centerTitle: true,
       ),
@@ -58,39 +83,77 @@ class _PassesTabState extends State<PassesTab> {
               ),
               const SizedBox(height: 10),
               if (pendingRequests.isEmpty)
-                const Text('No pending requests')
+                const Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    'No pending requests',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                )
               else
                 Column(
                   children: pendingRequests.asMap().entries.map((entry) {
                     int index = entry.key;
                     PassRequest request = entry.value;
                     return Card(
-                      elevation: 2,
-                      child: ListTile(
-                        title: Text(request.teacher),
-                        subtitle: Text(request.time),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton(
-                              onPressed: () => acceptRequest(index),
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Accept'),
+                      elevation: 5,
+                      color: Brightness.dark == Theme.of(context).brightness
+                          ? Colors.grey[900]
+                          : Colors.white,
+                      shadowColor:
+                          Brightness.dark == Theme.of(context).brightness
+                              ? const Color.fromARGB(255, 102, 102, 102)
+                              : Colors.black,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.grey[500],
+                              child: Text(request.teacher[0]),
                             ),
-                            const SizedBox(width: 10),
-                            TextButton(
-                              onPressed: () => rejectRequest(index),
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Reject'),
+                            title: Text(request.teacher),
+                            subtitle: Text(request.time),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () =>
+                                        acceptRequest(index, TimeOfDay.now()),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.all(16.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      backgroundColor: Colors.blueAccent,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: const Text('Accept'),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () => rejectRequest(index),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.all(16.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 255, 217, 217),
+                                      foregroundColor:
+                                          const Color.fromARGB(255, 255, 0, 0),
+                                    ),
+                                    child: const Text('Decline'),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     );
                   }).toList(),
@@ -106,24 +169,28 @@ class _PassesTabState extends State<PassesTab> {
                 const Text('No active passes')
               else
                 Column(
-                  children: activePasses.map((pass) {
-                    return Card(
-                      elevation: 2,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.blueAccent,
-                          child: Text(pass.destination[0]),
-                        ),
-                        title: Text(pass.destination),
-                        subtitle: Text(pass.date),
-                        trailing: const Text(
-                          'Edit',
-                          style: TextStyle(color: Colors.blue),
-                        ),
+                    children: activePasses.map((pass) {
+                  return Card(
+                    elevation: 5,
+                    color: Brightness.dark == Theme.of(context).brightness
+                        ? Colors.grey[900]
+                        : Colors.white,
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.grey[500],
+                        child: Text(pass.destination[0]),
                       ),
-                    );
-                  }).toList(),
-                ),
+                      title: Text(pass.destination),
+                      subtitle: Text(pass.date),
+                      trailing: pass.isEditable
+                          ? const Text(
+                              'Edit',
+                              style: TextStyle(color: Colors.blue),
+                            )
+                          : null,
+                    ),
+                  );
+                }).toList()),
             ],
           ),
         ),
@@ -143,6 +210,7 @@ class PassRequest {
 class ActivePass {
   final String destination;
   final String date;
+  final bool isEditable;
 
-  ActivePass(this.destination, this.date);
+  ActivePass(this.destination, this.date, this.isEditable);
 }

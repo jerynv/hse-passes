@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
       //rout to /home
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => HomePage(),
+          builder: (context) => const HomePage(),
         ),
       );
     } else {
@@ -166,9 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Hse Passes',
                       style: TextStyle(
-                        color: brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
+                        color: Colors.blue,
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -275,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                             // Navigate to sign up
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => SignupPage(),
+                                builder: (context) => const SignupPage(),
                               ),
                             );
                           },

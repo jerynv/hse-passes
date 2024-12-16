@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import 'theme/theme.dart';
-import 'pages/home.dart';
-import 'pages/signup.dart';
 import 'pages/login.dart';
 
 void main() {
