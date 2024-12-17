@@ -168,7 +168,7 @@ class _SignUpPageState extends State<SignupPage> {
   Widget _buildHeader(Brightness brightness) {
     return Column(
       children: [
-        Text(
+        const Text(
           'Hse Passes',
           style: TextStyle(
             color: Colors.blueAccent,

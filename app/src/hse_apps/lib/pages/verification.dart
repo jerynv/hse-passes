@@ -3,7 +3,7 @@ import 'package:hse_apps/pages/login.dart';
 import 'package:hse_apps/pages/signup.dart';
 
 class VerificationPage extends StatefulWidget {
-  const VerificationPage({Key? key, required this.email}) : super(key: key);
+  const VerificationPage({super.key, required this.email});
   final String email;
 
   @override

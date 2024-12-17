@@ -164,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    Text(
+                    const Text(
                       'Hse Passes',
                       style: TextStyle(
                         color: Colors.blue,
