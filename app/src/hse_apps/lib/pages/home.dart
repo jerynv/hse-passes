@@ -32,11 +32,15 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? Colors.black
           : Colors.white,
-      body: _pages[_currentIndex],
+      body: Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: _pages[_currentIndex],
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(10),
         child: GNav(
           tabBackgroundColor: Colors.blueAccent.withOpacity(.2),
+          tabBorderRadius: 10,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           tabs: _navButtons.map((navButton) {
             return _buildNavButton(

@@ -46,7 +46,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     if (_emailController.text.isNotEmpty &&
@@ -102,7 +101,9 @@ class _LoginPageState extends State<LoginPage> {
                             width: 200,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent),
+                                  backgroundColor: Colors.blueAccent,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10))),
                               onPressed: () {
                                 setState(() {
                                   _loginFailed = false;
