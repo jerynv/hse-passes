@@ -186,12 +186,6 @@ class _PassesTabState extends State<PassesTab> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: request.urgent
-                                ? Colors.redAccent
-                                : Colors.blueAccent,
-                            width: 1,
-                          ),
                         ),
                         child: InkWell(
                           customBorder: RoundedRectangleBorder(

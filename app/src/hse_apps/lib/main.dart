@@ -9,12 +9,10 @@ void main() {
             statusBarColor: Colors.transparent, 
       )); 
   runApp(
-
     ChangeNotifierProvider<ThemeProvider>(
       create: (context) => ThemeProvider(),
       child: const MyApp(),
     )
-
   );
 }
 

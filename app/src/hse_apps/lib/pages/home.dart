@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:bottom_navbar_with_indicator/bottom_navbar_with_indicator.dart';
 import 'tabs/request.dart';
 import 'tabs/passes.dart';
 import 'tabs/user.dart';
@@ -32,20 +33,64 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).brightness == Brightness.dark
           ? Colors.black
           : Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.only(top: 20),
-        child: _pages[_currentIndex],
+      body: Column(
+        children: [
+          // Spacer bar
+          Container(
+            height: 10, // Height of the spacer bar
+            color: Colors.grey.withOpacity(0.5), // Spacer bar color
+          ),
+          Expanded(
+            child: _pages[_currentIndex],
+          ),
+        ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(10),
-        child: GNav(
-          tabBackgroundColor: Colors.blueAccent.withOpacity(.2),
-          tabBorderRadius: 10,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          tabs: _navButtons.map((navButton) {
-            return _buildNavButton(
-                navButton.icon, navButton.text, navButton.index);
-          }).toList(), // Convert Iterable to List
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(0),
+        color: Brightness.dark == Theme.of(context).brightness
+            ? Colors.black
+            : Colors.white,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Container(
+              width: double.infinity,
+              height: 2,
+              decoration: BoxDecoration(
+                color: Brightness.dark == Theme.of(context).brightness
+                    ? Colors.grey.withOpacity(0.5)
+                    : Colors.grey.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),
+              child: GNav(
+                tabBackgroundColor: Colors.blueAccent.withOpacity(.2),
+                tabBorderRadius: 10,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                gap: 8,
+                tabs: _navButtons.map((navButton) {
+                  return _buildNavButton(
+                    navButton.icon,
+                    navButton.text,
+                    navButton.index,
+                  );
+                }).toList(),
+                selectedIndex: _currentIndex,
+                onTabChange: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -55,11 +100,7 @@ class _HomePageState extends State<HomePage> {
     return GButton(
       icon: icon,
       text: text,
-      onPressed: () {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
+      
     );
   }
 }
