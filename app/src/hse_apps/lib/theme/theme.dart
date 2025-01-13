@@ -5,13 +5,16 @@ ThemeData LightMode = ThemeData(
   colorScheme: const ColorScheme.light(
     surface: Colors.white
   ),
+  fontFamily: 'apple',
 );
 
 ThemeData DarkMode = ThemeData(
   brightness: Brightness.dark,
-  colorScheme: ColorScheme.dark(
+  colorScheme: const ColorScheme.dark(
     surface: Colors.black
   ),
+  fontFamily: 'apple',
+  
 );
 
 //secondary text colors
@@ -24,3 +27,12 @@ Color primary_text_color_dark = Colors.white;
 
 Color secondary_Border_color_dark = Colors.grey[800]!;
 Color secondary_Border_color = Colors.grey[400]!;
+
+//other text colors
+Color opaque_white_text = Colors.white.withOpacity(.5);
+
+//main color
+Color main_color = Colors.blueAccent;
+Color main_color_dark = Colors.black;
+
+Color main_container_color_dark = const Color.fromARGB(255, 15, 15, 15);

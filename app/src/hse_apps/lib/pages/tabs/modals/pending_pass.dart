@@ -30,11 +30,11 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: brightness == Brightness.dark
-                ? const Color.fromARGB(255, 27, 27, 27)
+                ? main_container_color_dark 
                 : Colors.white,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
             ),
           ),
           child: Column(
@@ -49,9 +49,9 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                       children: [
                         Container(
                           width: 60,
-                          height: 6,
+                          height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.grey[400],
+                            color: brightness == Brightness.dark ? secondary_Border_color_dark : Colors.grey[400],
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -206,10 +206,10 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                                       ),
                                     ),
                                     message
-                                        ? Icon(
-                                            CupertinoIcons.check_mark_circled,
+                                        ? const Icon(
+                                            Icons.check_rounded,
                                             color: Colors.green)
-                                        : Icon(CupertinoIcons.xmark_circle,
+                                        : const Icon(Icons.close_rounded,
                                             color: Colors.red),
                                   ],
                                 ),
@@ -226,7 +226,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                             child: Container(
                               width: double.infinity,
                               //set max height to 100
-                              constraints: BoxConstraints(
+                              constraints: const BoxConstraints(
                                   maxHeight: 400, minHeight: 100),
 
                               padding: const EdgeInsets.all(10.0),
@@ -260,7 +260,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Row(
                   children: [
                     Expanded(
@@ -272,7 +272,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.all(16.0),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(50),
                           ),
                           backgroundColor: Colors.blueAccent,
                           foregroundColor: Colors.white,

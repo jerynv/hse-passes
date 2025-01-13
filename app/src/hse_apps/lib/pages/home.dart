@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:bottom_navbar_with_indicator/bottom_navbar_with_indicator.dart';
+import 'package:hse_apps/theme/theme.dart';
 import 'tabs/request.dart';
 import 'tabs/passes.dart';
-import 'tabs/user.dart';
+import 'tabs/settings.dart';
+import 'tabs/clock.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,97 +18,154 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const PassesTab(),
     const RequestsTab(),
-    const UserTab(),
-  ];
-
-  final List<navButton> _navButtons = [
-    navButton(icon: Icons.home, text: '  Passes', index: 0),
-    navButton(icon: Icons.add_box_outlined, text: '  Requests', index: 1),
-    navButton(icon: Icons.account_circle, text: '  User', index: 2),
+    const ClockTab(),
+    const SettingsTab(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
-          ? Colors.black
-          : Colors.white,
-      body: Column(
-        children: [
-          // Spacer bar
-          Container(
-            height: 10, // Height of the spacer bar
-            color: Colors.grey.withOpacity(0.5), // Spacer bar color
-          ),
-          Expanded(
-            child: _pages[_currentIndex],
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(0),
-        color: Brightness.dark == Theme.of(context).brightness
-            ? Colors.black
-            : Colors.white,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 2,
-              decoration: BoxDecoration(
-                color: Brightness.dark == Theme.of(context).brightness
-                    ? Colors.grey.withOpacity(0.5)
-                    : Colors.grey.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(3),
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Scaffold(
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? main_color_dark
+              : Colors.grey[100],
+          //remove appbar
+          body: Column(
+            children: [
+              // Spacer bar
+              Expanded(
+                child: _pages[_currentIndex],
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),
-              child: GNav(
-                tabBackgroundColor: Colors.blueAccent.withOpacity(.2),
-                tabBorderRadius: 10,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                gap: 8,
-                tabs: _navButtons.map((navButton) {
-                  return _buildNavButton(
-                    navButton.icon,
-                    navButton.text,
-                    navButton.index,
-                  );
-                }).toList(),
-                selectedIndex: _currentIndex,
-                onTabChange: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
+            ],
+          ),
+
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: .1,
+                width: double.infinity,
+                color: Brightness == Theme.of(context).brightness
+                    ? secondary_Border_color_dark
+                    : secondary_Border_color,
               ),
-            ),
-          ],
+              Container(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black
+                    : Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: BottomNavigationBar(
+                        type: BottomNavigationBarType.fixed,
+                        currentIndex: _currentIndex,
+                        onTap: (index) {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        },
+                        items: [
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              _currentIndex == 0
+                                  ? Icons.home
+                                  : Icons.home_outlined,
+                              color: _currentIndex == 0
+                                  ? Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.white
+                                      : Colors.black
+                                  : Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.grey[700]
+                                      : Colors.grey[400],
+                            ),
+                            label: 'Passes',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              _currentIndex == 1
+                                  ? Icons.add_box_rounded
+                                  : Icons.add_box_outlined,
+                              color: _currentIndex == 1
+                                  ? Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.white
+                                      : Colors.black
+                                  : Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.grey[700]
+                                      : Colors.grey[400],
+                            ),
+                            label: 'Requests',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              _currentIndex == 2
+                                  ? Icons.timer_rounded
+                                  : Icons.timer_outlined,
+                              color: _currentIndex == 2
+                                  ? Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.white
+                                      : Colors.black
+                                  : Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.grey[700]
+                                      : Colors.grey[400],
+                            ),
+                            label: 'Clock',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              _currentIndex == 3
+                                  ? Icons.settings_rounded
+                                  : Icons.settings_outlined,
+                              color: _currentIndex == 3
+                                  ? Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.white
+                                      : Colors.black
+                                  : Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? Colors.grey[700]
+                                      : Colors.grey[400],
+                            ),
+                            label: 'Settings',
+                          ),
+                        ],
+                        backgroundColor: Colors.transparent,
+                        selectedItemColor:
+                            Brightness.dark == Theme.of(context).brightness
+                                ? Colors.white
+                                : Colors.black,
+                        unselectedItemColor:
+                            Brightness.dark == Theme.of(context).brightness
+                                ? Colors.grey[700]
+                                : Colors.grey[300],
+                        selectedFontSize: 12,
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
-  GButton _buildNavButton(IconData icon, String text, int index) {
-    return GButton(
-      icon: icon,
-      text: text,
-      
-    );
-  }
-}
-
-class navButton {
-  final IconData icon;
-  final String text;
-  final int index;
-
-  navButton({required this.icon, required this.text, required this.index});
 }
