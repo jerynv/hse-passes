@@ -164,9 +164,9 @@ class Schedule {
         return timer.cancel();
       }
       DateTime now = DateTime.now();
-
-      //int seconds = _secondsFromTime(time);
-      int seconds = test;
+      List<int> time = [now.hour, now.minute, now.second];
+      int seconds = _secondsFromTime(time);
+     // int seconds = test;
       //from list find where seconds is greater than or equal to a key value while being less than the next key value if it exists
       //second element should be the next key value if it exists
 
