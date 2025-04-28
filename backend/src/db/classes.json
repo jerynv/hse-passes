@@ -1,0 +1,16 @@
+{
+    "0": {
+        "period": "any",
+        "subject": "release",
+        "className": "flex/release",
+        "teacherId": "0000000",
+        "Room": "release"
+    },
+    "uuid1": {
+        "period": 1,
+        "subject": "Math",
+        "className": "Precalculus",
+        "teacherId": "1234567",
+        "Room": "F201"
+    }
+}

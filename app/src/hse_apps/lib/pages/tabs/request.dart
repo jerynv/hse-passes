@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/functions/ws.dart';
 import 'package:hse_apps/theme/theme.dart';
 
 class RequestsTab extends StatefulWidget {
@@ -291,7 +294,17 @@ class RequestState extends State<RequestsTab> {
                                     borderRadius: BorderRadius.circular(50),
                                   ),
                                   child: TextButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        WebSocketProvider.send(jsonEncode({
+                                          "Operation": "SendPassRequest",
+                                          "Data": {
+                                            "id": Auth.loginId,
+                                            "token": Auth.loginBearerToken,
+                                            "PassType": passType.description,
+                                            "PassName": passType.assName,
+                                          }
+                                        }));
+                                      },
                                       child: const Text(
                                         'Request',
                                         style: TextStyle(
@@ -307,7 +320,6 @@ class RequestState extends State<RequestsTab> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                
                               ),
                               Divider(
                                 color: brightness == Brightness.dark

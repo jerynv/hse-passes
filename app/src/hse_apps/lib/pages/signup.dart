@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hse_apps/pages/login.dart';
-import 'package:hse_apps/pages/verification.dart';
+
 import 'package:provider/provider.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 
@@ -44,33 +44,25 @@ class _SignUpPageState extends State<SignupPage> {
   }
 
   Future<void> _signup() async {
-  setState(() {
-    _isSigningIn = true;
-    _loginFailed = false;
-  });
-
-  await Future.delayed(const Duration(seconds: 2)); // Simulate server delay
-
-  final email = _emailController.text;
-  final studentID = _studentIDController.text;
-  final password = _passwordController.text;
-
-  if (email == 'admin' && studentID == '123456' && password == 'pass') {
-    // Navigate to Verification Page
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => VerificationPage(email: email), // Pass email for context
-      ),
-    );
-  } else {
     setState(() {
-      _loginFailed = true;
-      _isSigningIn = false;
+      _isSigningIn = true;
+      _loginFailed = false;
     });
-  }
-}
 
+    await Future.delayed(const Duration(seconds: 2)); // Simulate server delay
+
+    final email = _emailController.text;
+    final studentID = _studentIDController.text;
+    final password = _passwordController.text;
+
+    if (email == 'admin' && studentID == '123456' && password == 'pass') {
+    } else {
+      setState(() {
+        _loginFailed = true;
+        _isSigningIn = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,8 +124,8 @@ class _SignUpPageState extends State<SignupPage> {
           _buildTextField(_passwordController, 'Password', brightness,
               isPassword: true),
           const SizedBox(height: 20),
-          _buildTextField(_passwordConfirmController, 'Confirm Password',
-              brightness,
+          _buildTextField(
+              _passwordConfirmController, 'Confirm Password', brightness,
               isPassword: true),
           const SizedBox(height: 20),
           _buildSignupButton(),
@@ -152,9 +144,7 @@ class _SignUpPageState extends State<SignupPage> {
       children: [
         IconButton(
           icon: Icon(
-            brightness == Brightness.dark
-                ? Icons.light_mode
-                : Icons.dark_mode,
+            brightness == Brightness.dark ? Icons.light_mode : Icons.dark_mode,
             color: brightness == Brightness.dark ? Colors.white : Colors.black,
           ),
           onPressed: () {
@@ -190,8 +180,8 @@ class _SignUpPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint,
-      Brightness brightness,
+  Widget _buildTextField(
+      TextEditingController controller, String hint, Brightness brightness,
       {bool isPassword = false}) {
     return TextField(
       controller: controller,
@@ -201,9 +191,8 @@ class _SignUpPageState extends State<SignupPage> {
           color: brightness == Brightness.dark ? Colors.white : Colors.black),
       decoration: InputDecoration(
         filled: true,
-        fillColor: brightness == Brightness.dark
-            ? Colors.grey[850]
-            : Colors.grey[200],
+        fillColor:
+            brightness == Brightness.dark ? Colors.grey[850] : Colors.grey[200],
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey[500]),
         border: OutlineInputBorder(
@@ -239,7 +228,8 @@ class _SignUpPageState extends State<SignupPage> {
           child: Text(
             'By signing up, you agree to our Terms of Service and Privacy Policy',
             style: TextStyle(
-              color: brightness == Brightness.dark ? Colors.grey : Colors.black54,
+              color:
+                  brightness == Brightness.dark ? Colors.grey : Colors.black54,
               fontSize: 14,
             ),
           ),

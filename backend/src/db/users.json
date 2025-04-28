@@ -1,0 +1,40 @@
+{
+    "Id": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "Password": "argon2idv",
+        "Email": "",
+        "HasPickedClasses": false,
+        "Classes": {
+            "1st": "uuid",
+            "2nd": "uuid",
+            "3rd": "uuid",
+            "4th": "uuid",
+            "5th": "uuid",
+            "6th": "uuid",
+            "7th": "uuid",
+            "8th": "uuid",
+            "9th": "uuid"
+        }
+    },
+    "251378": {
+        "first_name": "jeryn",
+        "last_name": "on server",
+        "role": "Student",
+        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "bearer": "",
+        "Email": "",
+        "HasPickedClasses": false,
+        "Classes": {
+            "1st": "uuid1",
+            "2nd": "0",
+            "3rd": "0",
+            "4th": "0",
+            "5th": "0",
+            "6th": "0",
+            "7th": "0",
+            "8th": "0",
+            "9th": "0"
+        }
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "4-24-2024": {
+        "passIncrementId": {
+            "CurrentClassUUID": "uuid",
+            "senderId": "251378",
+            "PassName": "Pass Name",
+            "PassType": "Bathroom Pass",
+            "PassStatus": "rejected",
+            "PassTime": "epoch time"
+        }
+    }
+}

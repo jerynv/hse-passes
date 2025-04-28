@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "Dart",
+            "type": "dart",
+            "request": "launch",
+            "program": "app/src/hse_apps/lib/main.dart"
+            
+        }
+    ]
+}

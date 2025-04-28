@@ -1,324 +1,251 @@
+// staful page setup please
+
+import 'dart:ffi';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:hse_apps/pages/signup.dart';
+import 'package:flutter/services.dart';
+import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/theme/theme.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'home.dart';
-import 'dart:async';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isSigningIn = false;
-  bool _loginFailed = false;
-  bool _can_login = false;
 
-  Future<void> _login() async {
+  bool isLoading = false;
+
+  Future<void> login_page_login() async {
     setState(() {
-      _isSigningIn = true;
-      _loginFailed = false;
+      isLoading = true;
     });
-
-    await Future.delayed(const Duration(seconds: 2)); // Simulate server delay
-
-    final email = _emailController.text;
-    final password = _passwordController.text;
-
-    if (email == 'admin' && password == 'pass') {
-      // ignore: use_build_context_synchronously
-      //rout to /home
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
+    var id = _idController.text;
+    var password = _passwordController.text;
+    //var isLoggedIn = await Auth.login(id, password);
+    var isLoggedIn = await Auth.login("251378", "password123"); 
+    if (isLoggedIn) {
+      // Navigate to the home page
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      setState(() {
-        _loginFailed = true;
-      });
+      // Show an error message
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Login Failed',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                )),
+            content: const Text('Invalid ID or Password'),
+            actions: [
+              Container(
+                width: double.infinity,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: main_color,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
+              ),
+            ],
+          );
+        },
+      );
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      _can_login = true;
-      print("object");
-    } else {
-      _can_login = false;
-    }
-    return Scaffold(
-      backgroundColor:
-          brightness == Brightness.dark ? Colors.black : Colors.grey[100],
-      body: Center(
-        child: _isSigningIn
-            ? AnimatedSwitcher(
-                duration: const Duration(milliseconds: 1000),
-                child: _loginFailed
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error,
-                            color: Colors.red,
-                            size: 80,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Login Failed',
-                            style: TextStyle(
-                              color: brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            constraints: const BoxConstraints(maxWidth: 210),
-                            child: Text(
-                              'Incorrect email or password. Please try again.',
-                              style: TextStyle(
-                                color: brightness == Brightness.dark
-                                    ? Colors.grey
-                                    : Colors.black54,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: 200,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              onPressed: () {
-                                setState(() {
-                                  _loginFailed = false;
-                                  _isSigningIn = false;
-                                });
-                              },
-                              child: const Text('Back',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  )),
-                            ),
-                          )
-                        ],
-                      )
-                    : //text saying loading and a circular progress indicator
+    var isdark = Theme.of(context).brightness == Brightness.dark;
 
-                    Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'logging in',
-                            style: TextStyle(
-                              color: brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                              fontSize: 20,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const CircularProgressIndicator(
-                            color: Colors.blueAccent,
-                          ),
-                        ],
-                      ))
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+    return Scaffold(
+        body: isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                  strokeCap: StrokeCap.round,
+                  strokeWidth: 2,
+                  color: main_color,
+                ),
+              )
+            : Container(
+                padding: const EdgeInsets.all(30),
+                width: double.infinity,
+                // decoration: BoxDecoration(color: Colors.red),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            brightness == Brightness.dark
-                                ? Icons.light_mode
-                                : Icons.dark_mode,
-                            color: brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          onPressed: () {
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .toggleTheme();
-                          },
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      'Hse Passes',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Please sign in to continue',
-                      style: TextStyle(
-                        color: brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 40),
-                    TextField(
-                      controller: _emailController,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: brightness == Brightness.dark
-                            ? Colors.grey[850]
-                            : Colors.grey[200],
-                        hintText: 'Email/Id',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: brightness == Brightness.dark
-                            ? Colors.grey[850]
-                            : Colors.grey[200],
-                        hintText: 'Password',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _can_login
-                          ? _login
-                          : null, // Disable button when _can_login is false
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _can_login ? Colors.blueAccent : Colors.grey,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
-                        // Navigate to password recovery
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                            color: brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black54),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account?",
+                    //image at the top of the page
+
+                    RichText(
+                      text: TextSpan(
+                          //get all but the last word of the title
+                          text: 'Welcome to \n',
                           style: TextStyle(
-                              color: brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black54),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Navigate to sign up
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const SignupPage(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(color: Colors.blueAccent),
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            color: isdark ? Colors.white : Colors.black,
                           ),
+                          children: [
+                            TextSpan(
+                              text: 'Hse Passes!',
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w600,
+                                color: main_color,
+                              ),
+                            ),
+                          ]),
+                    ),
+                    const SizedBox(height: 30),
+                    createTextField(
+                      "Student Id",
+                      false,
+                      _idController,
+                      Icons.numbers,
+                      isdark,
+                    ),
+                    createTextField(
+                      "Password",
+                      true,
+                      _passwordController,
+                      Icons.lock_outline,
+                      isdark,
+                    ),
+                    const SizedBox(height: 30),
+                    GestureDetector(
+                      onTap: () {
+                        login_page_login();
+                      },
+                      child: Container(
+                        height: 55,
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: main_color,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Text(
+                          "Continue",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                  context, '/teacherLogin');
+                            },
+                            child: const Text("Teacher Login",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                )),
+                          ),
+                        ),
+                        Container(
+                            height: 20,
+                            width: 1,
+                            color: isdark
+                                ? const Color.fromARGB(255, 0, 0, 0)
+                                    .withOpacity(.5)
+                                : const Color.fromARGB(255, 0, 0, 0)
+                                    .withOpacity(.5)),
+                        Expanded(
+                          child: TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacementNamed(
+                                    context, '/signup');
+                              },
+                              child: Text("Create Account", 
+                                  style: TextStyle(
+                                    color: main_color.withOpacity(.9),
+                                  ))),
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _emailController.addListener(_validateInputs);
-    _passwordController.addListener(_validateInputs);
-  }
-
-  void _validateInputs() {
-    setState(() {
-      _can_login = _emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty;
-    });
-  }
-
-  @override
-  void dispose() {
-    _emailController.removeListener(_validateInputs);
-    _passwordController.removeListener(_validateInputs);
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+              ));
   }
 }
 
-//error screen with buttton and error message
-
-// import 'package:flutter/material.dart';
-// import 'home.dart';
-// import 'dart:async';
+Widget createTextField(
+  String hint,
+  bool isPassword,
+  TextEditingController controller,
+  IconData icon,
+  bool isdark,
+) {
+  return Container(
+    margin: EdgeInsets.only(bottom: 10),
+    padding: EdgeInsets.only(left: 15),
+    height: 60,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color:
+          isdark ? Colors.white.withOpacity(.1) : Colors.grey.withOpacity(.1),
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          color: isdark ? Colors.white.withOpacity(.5) : Colors.grey,
+        ),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            obscureText: isPassword,
+            cursorColor: main_color,
+            style: TextStyle(
+              color: isdark ? Colors.white : Colors.black,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: isdark ? Colors.white.withOpacity(.5) : Colors.grey,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.only(left: 10),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}

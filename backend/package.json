@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "srv.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "argon": "^2.0.21",
+    "argon2": "^0.43.0",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1",
+    "sleep-promise": "^9.1.0",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
+  }
+}
