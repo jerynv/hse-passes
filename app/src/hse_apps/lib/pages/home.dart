@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/functions/error.dart';
 import 'package:hse_apps/functions/ws.dart';
+import 'package:hse_apps/pages/tabs/TRequest.dart';
 import 'package:hse_apps/pages/tabs/class.dart';
 import 'package:hse_apps/pages/tabs/error.dart';
 import 'package:hse_apps/theme/theme.dart';
@@ -20,9 +23,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+  bool disposed = false;
 
   List<Widget> get _pages {
-    switch (Auth.userData["role"]) {
+    switch (Auth.userData?["role"]) {
       case 'Student':
         return [
           const PassesTab(),
@@ -33,7 +37,7 @@ class _HomePageState extends State<HomePage> {
       case 'Teacher':
         return [
           const ClassTab(),
-          const RequestsTab(),
+          const TeacherRequestsTab(),
           const ClockTab(),
           const SettingsTab(),
         ];
@@ -52,7 +56,7 @@ class _HomePageState extends State<HomePage> {
           const ErrorTab(),
         ];
     }
-}
+  }
 
   final List<String> _studentTabs = [
     'Passes',
@@ -85,51 +89,27 @@ class _HomePageState extends State<HomePage> {
     debugPrint('WebSocket finsihed');
     if (WebSocketProvider.isConnected()) {
       WebSocketProvider.send(jsonEncode({
-        'Operation': 'setUser',
-        'Data': {
-          'id': Auth.loginId,
+        'operation': 'setUser',
+        'data': {
+          'refId': Auth.loginId,
         },
       }));
-      Future.delayed(Duration(seconds: 10), () {
+      await Future.delayed(Duration(seconds: 10), () async {
+        if (disposed) {
+          return;
+        }
+        debugPrint('for some reason still got here' + WebSocketProvider.verified.toString() + disposed.toString());
         if (!WebSocketProvider.verified) {
-          Navigator.pushReplacementNamed(context, '/login');
-          Auth.logout();
-          // Show a dialog or a snackbar to inform the user
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Verification Failed',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    )),
-                content:
-                    const Text('User verification failed. Please login again.'),
-                actions: [
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: main_color,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        )),
-                  ),
-                ],
-              );
+          await Auth.logout(error: false, context: context);
+          ShowErrorDialog(
+            context,
+            'Error',
+            'User verification failed. Please try again.',
+            'OK',
+            Icons.error,
+            Colors.red,
+            null,
+            () {
             },
           );
         }
@@ -143,6 +123,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     connectWebSocket();
+  }
+
+  @override
+  void dispose() {
+    disposed = true;
+    super.dispose();
   }
 
   @override
@@ -253,9 +239,9 @@ class _HomePageState extends State<HomePage> {
                                             ? Colors.grey[700]
                                             : Colors.grey[400],
                                   ),
-                                  label: Auth.userData["role"] == 'Student'
+                                  label: Auth.userData?["role"] == 'Student'
                                       ? _studentTabs[0]
-                                      : Auth.userData["role"] == 'Teacher'
+                                      : Auth.userData?["role"] == 'Teacher'
                                           ? _teacherTabs[0]
                                           : _adminTabs[0],
                                 ),
@@ -274,9 +260,9 @@ class _HomePageState extends State<HomePage> {
                                             ? Colors.grey[700]
                                             : Colors.grey[400],
                                   ),
-                                  label: Auth.userData["role"] == 'Student'
+                                  label: Auth.userData?["role"] == 'Student'
                                       ? _studentTabs[1]
-                                      : Auth.userData["role"] == 'Teacher'
+                                      : Auth.userData?["role"] == 'Teacher'
                                           ? _teacherTabs[1]
                                           : _adminTabs[1],
                                 ),
@@ -295,9 +281,9 @@ class _HomePageState extends State<HomePage> {
                                             ? Colors.grey[700]
                                             : Colors.grey[400],
                                   ),
-                                  label: Auth.userData["role"] == 'Student'
+                                  label: Auth.userData?["role"] == 'Student'
                                       ? _studentTabs[2]
-                                      : Auth.userData["role"] == 'Teacher'
+                                      : Auth.userData?["role"] == 'Teacher'
                                           ? _teacherTabs[2]
                                           : _adminTabs[2],
                                 ),
@@ -316,9 +302,9 @@ class _HomePageState extends State<HomePage> {
                                             ? Colors.grey[700]
                                             : Colors.grey[400],
                                   ),
-                                  label: Auth.userData["role"] == 'Student'
+                                  label: Auth.userData?["role"] == 'Student'
                                       ? _studentTabs[3]
-                                      : Auth.userData["role"] == 'Teacher'
+                                      : Auth.userData?["role"] == 'Teacher'
                                           ? _teacherTabs[3]
                                           : _adminTabs[3],
                                 ),

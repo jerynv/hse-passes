@@ -169,3 +169,59 @@ async function GetClassInfo(classes) {
     }
     return classInfoDict;
 }
+
+export function getStudentInfo(id) {
+    const filePath = join(__dirname, "db/users.json");
+    let users = [];
+
+    try {
+        const fileData = fs.readFileSync(filePath, "utf-8");
+        users = JSON.parse(fileData);
+    } catch (error) {
+        console.error("Error reading users file:", error);
+        return null;
+    }
+
+    let user = users[id];
+
+    if (!user) {
+        return null;
+    }
+
+    const { Password, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
+}
+
+export function getTeacherInfo(id) {
+    const filePath = join(__dirname, "db/teachers.json");
+    let users = [];
+
+    try {
+        const fileData = fs.readFileSync(filePath, "utf-8");
+        users = JSON.parse(fileData);
+    } catch (error) {
+        console.error("Error reading users file:", error);
+        return null;
+    }
+
+    let user = users[id];
+
+    if (!user) {
+        return null;
+    }
+
+    const { Password, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
+}
+
+export const getUserInfo = async (id) => {
+    if (id.length == 7) {
+        return await getTeacherInfo(id);
+    } else if (id.length == 6) {
+        return await getStudentInfo(id);
+    } else {
+        return null;
+    }
+};

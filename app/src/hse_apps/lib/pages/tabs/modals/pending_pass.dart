@@ -1,16 +1,23 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/functions/ws.dart';
 import 'package:hse_apps/pages/tabs/passes.dart';
 import 'package:hse_apps/theme/theme.dart';
 
 class PendingPassRequestModal extends StatefulWidget {
-  const PendingPassRequestModal({super.key, required this.passRequest, required this.onAccept, required this.onReject});
+  const PendingPassRequestModal(
+      {super.key,
+      required this.passRequest,
+      required this.onAccept,
+      required this.onReject});
 
   final PassRequest passRequest;
-  final  Function onAccept;
-  final  Function onReject;
+  final Function onAccept;
+  final Function onReject;
 
   @override
   _PendingPassRequestModalState createState() =>
@@ -30,7 +37,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: brightness == Brightness.dark
-                ? main_container_color_dark 
+                ? main_container_color_dark
                 : Colors.white,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25),
@@ -51,7 +58,9 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                           width: 60,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: brightness == Brightness.dark ? secondary_Border_color_dark : Colors.grey[400],
+                            color: brightness == Brightness.dark
+                                ? secondary_Border_color_dark
+                                : Colors.grey[400],
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -206,8 +215,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                                       ),
                                     ),
                                     message
-                                        ? const Icon(
-                                            Icons.check_rounded,
+                                        ? const Icon(Icons.check_rounded,
                                             color: Colors.green)
                                         : const Icon(Icons.close_rounded,
                                             color: Colors.red),
@@ -265,9 +273,19 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                   children: [
                     Expanded(
                       child: TextButton(
-                        onPressed: () {
-                          // Accept logic here
-                          widget.onAccept();
+                        onPressed: () async {
+                          try {
+                            WebSocketProvider.send(jsonEncode({
+                              "Operation": "AcceptPassRequest",
+                              "Data": {
+                                "PassId": widget.passRequest.passUUID,
+                                "ClassUUID": widget.passRequest.classUUID,
+                              }
+                            }));
+                            widget.onAccept();
+                          } catch (e) {
+                            print(e);
+                          }
                         },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.all(16.0),

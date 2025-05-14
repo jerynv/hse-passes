@@ -1,16 +1,50 @@
 {
     "0": {
+        "id": "0",
+        "period": "any",
+        "subject": "idk",
+        "className": "No class",
+        "TeacherId": "0000000",
+        "Room": "idk"
+    },
+    "420": {
+        "id": "420",
         "period": "any",
         "subject": "release",
         "className": "flex/release",
-        "teacherId": "0000000",
+        "TeacherId": "0000000",
         "Room": "release"
     },
-    "uuid1": {
+    "deb23be7-fb99-4ab1-879e-a822a48750eb": {
+        "id": "deb23be7-fb99-4ab1-879e-a822a48750eb",
         "period": 1,
-        "subject": "Math",
-        "className": "Precalculus",
-        "teacherId": "1234567",
-        "Room": "F201"
+        "subject": "Comp Sci",
+        "className": "Cybersecurity Fundamentals",
+        "TeacherId": "2513780",
+        "Room": "F241"
+    },
+    "60fac22b-259a-4223-90a7-45db5b688832": {
+        "id": "60fac22b-259a-4223-90a7-45db5b688832",
+        "period": 2,
+        "subject": "Language Arts",
+        "className": "Ap Research Capstone",
+        "TeacherId": "2513782",
+        "Room": "J207"
+    },
+    "06e61824-2073-451b-b390-13115a79ff48": {
+        "id": "06e61824-2073-451b-b390-13115a79ff48",
+        "period": 5,
+        "subject": "Comp Sci",
+        "className": "Software Development Capstone",
+        "TeacherId": "2513783",
+        "Room": "B106"
+    },
+    "3f56c3b2-daa7-472d-a1c1-b5e712d79663": {
+        "id": "3f56c3b2-daa7-472d-a1c1-b5e712d79663",
+        "period": 6,
+        "subject": "Comp Sci",
+        "className": "Cybersecurity Fundamentals",
+        "TeacherId": "2513780",
+        "Room": "F241"
     }
 }

@@ -118,8 +118,7 @@ class _LandingPageState extends State<LandingPage> {
                 onTap: () {
                   setState(() {
                     if (landingIndex >= pages.keys.length - 1) {
-                      // Navigator.pushReplacementNamed(context, '/login');
-                      Navigator.pushReplacementNamed(context, '/login');
+                      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                       return;
                     }
                     landingIndex++;

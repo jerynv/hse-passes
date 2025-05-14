@@ -1,16 +1,20 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hse_apps/assets/variables.dart';
+import 'package:hse_apps/functions/error.dart';
+import 'package:hse_apps/functions/ws.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Auth {
   static String _LoginId = '';
   static String _LoginBearertoken = '';
-  static Map<dynamic, dynamic> _userData = {};
+  static Map<dynamic, dynamic>? _userData = {};
 
   static String get loginId => _LoginId;
   static String get loginBearerToken => _LoginBearertoken;
-  static Map<dynamic, dynamic> get userData => _userData;
+  static Map<dynamic, dynamic>? get userData => _userData;
 
   static Future<bool> login(String id, String password) async {
     // await Future.delayed(const Duration(seconds: 2));
@@ -25,8 +29,8 @@ class Auth {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'Operation': 'StudentLogin',
-          "Data": {
+          'operation': 'StudentLogin',
+          "data": {
             "id": id,
             "password": password,
           },
@@ -92,9 +96,26 @@ class Auth {
     }
   }
 
-  static void logout() {
+  static Future<void> logout(
+      {bool? error, required BuildContext context}) async {
+    await WebSocketProvider.close();
     _LoginId = '';
     _LoginBearertoken = '';
     _userData = {};
+    debugPrint("Logout: " + error.toString());
+
+    if (error == true || error == null) {
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      ShowErrorDialog(
+        context,
+        "Logout",
+        "You have been logged out successfully.",
+        "OK",
+        Icons.logout,
+        Colors.green,
+        null,
+        () {},
+      );
+    }
   }
 }

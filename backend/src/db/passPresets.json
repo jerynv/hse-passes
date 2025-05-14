@@ -1,6 +1,38 @@
-{
-    "Bathroom Pass": {
-        "name": "Bathroom Pass"
-        
+[
+    {
+        "Name": "Bathroom",
+        "Description": "Bathroom Pass"
+    },
+    {
+        "Name": "Cafeteria",
+        "Description": "Cafeteria Pass"
+    },
+    {
+        "Name": "Hallway",
+        "Description": "Hallway Pass"
+    },
+    {
+        "Name": "Library",
+        "Description": "Library Pass"
+    },
+    {
+        "Name": "Office",
+        "Description": "Office Pass"
+    },
+    {
+        "Name": "Parking Lot",
+        "Description": "Parking Lot Pass"
+    },
+    {
+        "Name": "School Store",
+        "Description": "School Store Pass"
+    },
+    {
+        "Name": "Sports Field",
+        "Description": "Sports Field Pass"
+    },
+    {
+        "Name": "Study Hall",
+        "Description": "Study Hall Pass"
     }
-}
+]

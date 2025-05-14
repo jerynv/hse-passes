@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hse_apps/functions/auth.dart';
 import 'package:hse_apps/pages/login.dart';
 import 'package:hse_apps/theme/theme.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
@@ -272,6 +273,37 @@ class SettingsTabState extends State<SettingsTab> {
                                     : secondary_Border_color,
                               ),
                             ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: () async {
+                      await Auth.logout(context: context);
+                      HapticFeedback.lightImpact();
+                    },
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Log out",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 14,
+                            color: brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                           )
                         ],
                       ),

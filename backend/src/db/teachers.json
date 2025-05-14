@@ -1,15 +1,15 @@
 {
-    "2513780": {
+    "0000000": {
         "bearer": "Bearer",
-        "prefix": "Mr.",
-        "first_name": "Somthing",
-        "last_name": "Fishel",
+        "Prefix": "",
+        "First_Name": "Hse",
+        "Last_Name": "",
         "role": "Teacher",
         "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
         "HasSetClasses": false,
         "Classes": {
-            "1st": "uuid1",
-            "2nd": "0",
+            "1st": "uuid0",
+            "2nd": "uuid1",
             "3rd": "0",
             "4th": "0",
             "5th": "0",
@@ -17,6 +17,90 @@
             "7th": "0",
             "8th": "0",
             "9th": "0"
+        },
+        "email": ""
+    },
+    "2513781": {
+        "bearer": "Bearer",
+        "Prefix": "Mr.",
+        "First_Name": "Nick",
+        "Last_Name": "Fishel",
+        "role": "Teacher",
+        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "HasSetClasses": false,
+        "Classes": {
+            "1": "deb23be7-fb99-4ab1-879e-a822a48750eb",
+            "2": "0",
+            "3": "0",
+            "4": "0",
+            "5": "0",
+            "6": "0",
+            "7": "0",
+            "8": "0",
+            "9": "0"
+        },
+        "email": ""
+    },
+    "2513782": {
+        "bearer": "Bearer",
+        "Prefix": "Mrs.",
+        "First_Name": "Jacqueline",
+        "Last_Name": "Carson",
+        "role": "Teacher",
+        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "HasSetClasses": false,
+        "Classes": {
+            "1": "0",
+            "2": "60fac22b-259a-4223-90a7-45db5b688832",
+            "3": "0",
+            "4": "0",
+            "5": "0",
+            "6": "0",
+            "7": "0",
+            "8": "0",
+            "9": "0"
+        },
+        "email": ""
+    },
+    "2513783": {
+        "bearer": "Bearer",
+        "Prefix": "Mrs.",
+        "First_Name": "Julie",
+        "Last_Name": "Alano",
+        "role": "Teacher",
+        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "HasSetClasses": false,
+        "Classes": {
+            "1": "0",
+            "2": "0",
+            "3": "0",
+            "4": "0",
+            "5": "06e61824-2073-451b-b390-13115a79ff48",
+            "6": "0",
+            "7": "0",
+            "8": "0",
+            "9": "0"
+        },
+        "email": ""
+    },
+    "2513784": {
+        "bearer": "Bearer",
+        "Prefix": "Mr.",
+        "First_Name": "Shawn",
+        "Last_Name": "Crull",
+        "role": "Teacher",
+        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "HasSetClasses": false,
+        "Classes": {
+            "1": "0",
+            "2": "0",
+            "3": "0",
+            "4": "0",
+            "5": "0",
+            "6": "3f56c3b2-daa7-472d-a1c1-b5e712d79663",
+            "7": "0",
+            "8": "0",
+            "9": "0"
         },
         "email": ""
     }

@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/functions/error.dart';
 import 'package:hse_apps/theme/theme.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -30,46 +31,28 @@ class _LoginPageState extends State<LoginPage> {
     var id = _idController.text;
     var password = _passwordController.text;
     //var isLoggedIn = await Auth.login(id, password);
-    var isLoggedIn = await Auth.login("251378", "password123"); 
+    var isLoggedIn = await Auth.login("251378", "password123");
     if (isLoggedIn) {
       // Navigate to the home page
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (rout) => false,
+      );
     } else {
       // Show an error message
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Login Failed',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                )),
-            content: const Text('Invalid ID or Password'),
-            actions: [
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: main_color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )),
-              ),
-            ],
-          );
+      ShowErrorDialog(
+        context,
+        "Login Failed",
+        "Invalid username or password",
+        "OK",
+        Icons.error,
+        Colors.red,
+        null,
+        () {
+          // Handle the error
+          _idController.clear();
+          _passwordController.clear();
         },
       );
     }
@@ -166,12 +149,14 @@ class _LoginPageState extends State<LoginPage> {
                         Expanded(
                           child: TextButton(
                             onPressed: () {
-                              Navigator.pushReplacementNamed(
-                                  context, '/teacherLogin');
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, '/teacherLogin', (route) => false);
                             },
-                            child: const Text("Teacher Login",
+                            child: Text("Teacher Login",
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: isdark
+                                      ? Colors.white.withOpacity(.9)
+                                      : Colors.black.withOpacity(.9),
                                 )),
                           ),
                         ),
@@ -179,17 +164,14 @@ class _LoginPageState extends State<LoginPage> {
                             height: 20,
                             width: 1,
                             color: isdark
-                                ? const Color.fromARGB(255, 0, 0, 0)
+                                ? const Color.fromARGB(255, 255, 255, 255)
                                     .withOpacity(.5)
                                 : const Color.fromARGB(255, 0, 0, 0)
                                     .withOpacity(.5)),
                         Expanded(
                           child: TextButton(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(
-                                    context, '/signup');
-                              },
-                              child: Text("Create Account", 
+                              onPressed: () {},
+                              child: Text("Create Account",
                                   style: TextStyle(
                                     color: main_color.withOpacity(.9),
                                   ))),

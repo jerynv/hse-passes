@@ -18,8 +18,21 @@ void main() {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +42,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       theme: Provider.of<ThemeProvider>(context).themeData,
       routes: {
-        '/home': (context) => const  HomePage(),
+        '/home': (context) => const HomePage(),
         '/signup': (context) => const SignupPage(),
         '/login': (context) => const LoginPage(),
         '/teacherLogin': (context) => const TeacherLoginPage(),

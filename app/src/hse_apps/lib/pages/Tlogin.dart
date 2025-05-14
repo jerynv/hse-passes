@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hse_apps/functions/auth.dart';
+import 'package:hse_apps/functions/error.dart';
 import 'package:hse_apps/theme/theme.dart';
 import 'package:hse_apps/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -30,48 +31,24 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
     var id = _idController.text;
     var password = _passwordController.text;
     //var isLoggedIn = await Auth.login(id, password);
-    var isLoggedIn = await Auth.Tlogin("2513780", "password123");
+    var isLoggedIn = await Auth.Tlogin("251378"+id, "password123");
     if (isLoggedIn) {
       // Navigate to the home page
-      Navigator.pushReplacementNamed(context, '/home', arguments: {
-        "teacher": true,
-      });
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (rout) => false);
     } else {
       // Show an error message
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Login Failed',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                )),
-            content: const Text('Invalid ID or Password'),
-            actions: [
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: main_color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )),
-              ),
-            ],
-          );
+      ShowErrorDialog(
+        context,
+        "Login Failed",
+        "Invalid username or password",
+        "OK",
+        Icons.error,
+        Colors.red,
+        null,
+        () {
+          // Handle the error
+          _idController.clear();
+          _passwordController.clear();
         },
       );
     }
@@ -168,7 +145,8 @@ class _TeacherLoginPageState extends State<TeacherLoginPage> {
                         Expanded(
                           child: TextButton(
                             onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/login');
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, '/login', (route) => false);
                             },
                             child: const Text("Student Login",
                                 style: TextStyle(

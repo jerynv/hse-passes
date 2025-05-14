@@ -1,62 +1,334 @@
 import { WebSocketServer } from "ws";
 import { v4 } from "uuid";
 import sleep from "sleep-promise";
+import * as logic from "./logic.js";
+// import { passType } from "./schema.js";
+import { getStudentInfo, getTeacherInfo, getUserInfo } from "./auth.js";
+import { MessageTypeBasic } from "./schema.js";
+import { logIt } from "./data.js";
 
-const wss = new WebSocketServer({ port: 8080, host: "192.168.5.42" });
+const wss = new WebSocketServer({
+    port: 8080,
+    //host: "192.168.5.42",
+    host: "0.0.0.0",
+});
+
 const clients = new Map();
 
-wss.on("connection", (ws) => {
+const websocketLogic = {
+    setUser: logic.setUser,
+};
+
+wss.on("connection", (ws, req) => {
     const clientConnectionTime = new Date();
 
-    console.log(`Client connected at ${clientConnectionTime}`);
+    logIt(`Client connected at ${clientConnectionTime}`);
 
     ws.on("error", (error) => {
-        console.error(`WebSocket error for client ${ws.userId}:`, error);
+        //i would want to close the connection as well if the error does not do so as well
+        if (!clients.has(ws.userId)) {
+            ws.close();
+            logIt(
+                `Client ${ws.userId} disconnected due to error: ${error.message}`,
+                "warn"
+            );
+            return;
+        }
+
+        logIt(
+            `Due to error: closing connection for client ${ws.userId}`,
+            "error"
+        );
+
+        clients.get(ws.userId).close();
+        clients.delete(ws.userId);
     });
 
     ws.on("message", async (message) => {
-        let FormattedMessage = {};
+        let formattedMessage = {};
+
         try {
-            FormattedMessage = JSON.parse(message);
+            formattedMessage = JSON.parse(message);
         } catch (e) {
-            ws.send("Error parsing message");
+            logIt(`Error parsing message: ${e.message}`, "error");
+            logic.wsSend(ws, 'unknown - ip: ' + ws._socket.remoteAddress, {
+                operation: "ShowError",
+                data: {
+                    success: false,
+                    title: "Fatal Error",
+                    message: `Error parsing request`,
+                },
+            });
             return;
         }
-        console.log(`Received message: ${message}`);
+
+        logIt(`Received message: ${message}`);
+
+        // ✅
+        // if (
+        //     !formattedMessage.data?.refId ||
+        //     !formattedMessage.data?.refId.length === 6 ||
+        //     !formattedMessage.data?.refId.length === 7 ||
+        //     isNaN(formattedMessage.data.refId)
+        // ) {
+        //     logic.wsSend(ws, {
+        //         operation: "ShowError",
+        //         data: {
+        //             success: false,
+        //             title: "Error",
+        //             message: `Invalid refId: ${formattedMessage.data.refId}`,
+        //         },
+        //     });
+        //     return;
+        // }
+        /// redid this code to use the schema validator
+
+        try {
+            let clientMessage = new MessageTypeBasic(formattedMessage);
+        } catch (e) {
+            logIt(`Error validating message: ${e.message}`, "error");
+            logic.wsSend(ws, 'unknown - ip: ' + ws._socket.remoteAddress, {
+                operation: "ShowError",
+                data: {
+                    success: false,
+                    title: "Error",
+                    message: `Error validating message: ${e.code}`,
+                },
+            });
+            return;
+        }
+
+        // just going to hold this in a easy to read variable for better usability, we don't want to assign it to a permanent variable, like inside the ws object so well just use a temp useless variable
+        let temporaryUserId = formattedMessage.data.refId;
+
+        try {
+            websocketLogic[formattedMessage.operation](
+                ws,
+                clients,
+                formattedMessage.data
+            );
+        } catch (e) {
+            logIt(`Unknown operation: ${formattedMessage.operation}`, "error");
+            logic.wsSend(ws, temporaryUserId, {
+                operation: "ShowError",
+                data: {
+                    success: false,
+                    title: "Error",
+                    message: `Unknown operation: ${formattedMessage.operation}`,
+                },
+            });
+        }
+        return;
+
         switch (FormattedMessage.Operation) {
             case "setUser":
-                if (clients.has(FormattedMessage.Data.id)) {
-                    console.warn(
-                        `User ID already exists, replacing connection`
-                    );
-                    let existingClient = clients.get(FormattedMessage.Data.id);
-                    existingClient.close();
-                    clients.delete(FormattedMessage.Data.id);
-                    console.log(
-                        `Closed existing connection for user ID: ${FormattedMessage.Data.id}`
-                    );
-                }
-                let userId = FormattedMessage.Data.id;
-                if (!FormattedMessage.Data || !userId) {
-                    console.log(`Error: Missing user ID for client`);
-                    ws.send("Error: Missing user ID");
-                    return;
-                }
-                console.log(`Setting user ID for client: ${userId}`);
-                clients.set(userId, ws);
-                ws.userId = userId;
-                ws.send(
-                    JSON.stringify({
-                        Operation: "verifyIntegrity",
-                        Data: { success: true },
-                    })
-                );
+                logic.setUser(ws, wss, FormattedMessage.Data);
                 break;
             case "SendPassRequest":
-                console.log(
-                    `Received pass request from client ${ws.userId}`
+                console.log(`Received pass request from client ${ws.userId}`);
+                await savePassRequest(FormattedMessage.Data)
+                    .then((result) => {
+                        if (result.success) {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "PassRequestResponse",
+                                    Data: { success: true, pass: result.pass },
+                                })
+                            );
+                            clients.get(result.pass.ReceiverId)?.send(
+                                JSON.stringify({
+                                    Operation: "PassRequest",
+                                    Data: {
+                                        success: true,
+                                        pass: result.pass,
+                                        sender: getStudentInfo(
+                                            result.pass.SenderId
+                                        ),
+                                    },
+                                })
+                            );
+                        } else {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "ShowError",
+                                    Data: {
+                                        success: false,
+                                        title: "Error",
+                                        message: result.message,
+                                    },
+                                })
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error saving pass request:", error);
+                        ws.send(
+                            JSON.stringify({
+                                Operation: "PassRequestResponse",
+                                Data: { success: false },
+                            })
+                        );
+                    });
+                break;
+            case "TeacherPersonRequest":
+                await savePassRequestPerson(FormattedMessage.Data)
+                    .then((result) => {
+                        if (result.success) {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "PassRequestResponse",
+                                    Data: { success: true, pass: result.pass },
+                                })
+                            );
+                            clients.get(result.pass.ReceiverId)?.send(
+                                JSON.stringify({
+                                    Operation: "PassRequest",
+                                    Data: {
+                                        success: true,
+                                        pass: result.pass,
+                                        sender: getTeacherInfo(
+                                            result.pass.SenderId
+                                        ),
+                                    },
+                                })
+                            );
+                        } else {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "ShowError",
+                                    Data: {
+                                        success: false,
+                                        title: "Error",
+                                        message: result.message,
+                                    },
+                                })
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error saving pass request:", error);
+                        ws.send(
+                            JSON.stringify({
+                                Operation: "PassRequestResponse",
+                                Data: { success: false },
+                            })
+                        );
+                    });
+
+                break;
+            case "StudentPersonRequest":
+                await savePassRequestPerson(FormattedMessage.Data)
+                    .then((result) => {
+                        if (result.success) {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "PassRequestResponse",
+                                    Data: { success: true, pass: result.pass },
+                                })
+                            );
+                            clients.get(result.pass.ReceiverId)?.send(
+                                JSON.stringify({
+                                    Operation: "PassRequest",
+                                    Data: {
+                                        success: true,
+                                        pass: result.pass,
+                                        sender: getStudentInfo(
+                                            result.pass.SenderId
+                                        ),
+                                    },
+                                })
+                            );
+                        } else {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "ShowError",
+                                    Data: {
+                                        success: false,
+                                        title: "Error",
+                                        message: result.message,
+                                    },
+                                })
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error saving pass request:", error);
+                        ws.send(
+                            JSON.stringify({
+                                Operation: "PassRequestResponse",
+                                Data: { success: false },
+                            })
+                        );
+                    });
+                break;
+            case "AcceptPassRequest":
+                console.log(`Accepting pass request from client ${ws.userId}`);
+                await AcceptPassRequest(FormattedMessage.Data)
+                    .then((result) => {
+                        if (result.success) {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "PassAcceptResponse",
+                                    Data: {
+                                        success: true,
+                                        pass: result.pass,
+                                    },
+                                })
+                            );
+                            for (let i = 0; i < result.notify.length; i++) {
+                                console.log(
+                                    `Notifying client ${result.notify[i]}`
+                                );
+                                if (clients.get(result.notify[i])) {
+                                    console.log(
+                                        `Client ${result.notify[i]} is connected`
+                                    );
+                                }
+                                clients.get(result.notify[i])?.send(
+                                    JSON.stringify({
+                                        Operation: "PassUpdate",
+                                        Data: {
+                                            success: true,
+                                            pass: result.pass,
+                                        },
+                                    })
+                                );
+                            }
+                        } else {
+                            ws.send(
+                                JSON.stringify({
+                                    Operation: "ShowError",
+                                    Data: {
+                                        success: false,
+                                        title: "Error",
+                                        message: result.message,
+                                    },
+                                })
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error accepting pass request:", error);
+                        ws.send(
+                            JSON.stringify({
+                                Operation: "PassRequestResponse",
+                                Data: { success: false },
+                            })
+                        );
+                    });
+                break;
+            default:
+                console.log(`Unknown operation: ${FormattedMessage.Operation}`);
+                ws.send(
+                    JSON.stringify({
+                        Operation: "ShowError",
+                        Data: {
+                            success: false,
+                            title: "Error",
+                            message: `Unknown operation: ${FormattedMessage.Operation}`,
+                        },
+                    })
                 );
-                
                 break;
         }
     });
@@ -77,23 +349,12 @@ console.log(
         wss.options.port
 );
 
-//wait 30 seconds then send a pin message to client 251378
-// setTimeout(() => {
-//     const userId = "251378";
-//     const ws = clients.get(userId);
-//     if (ws) {
-//         ws.send(
-//             JSON.stringify({
-//                 Operation: "Pin",
-//                 Data: {
-//                     id: userId,
-//                     pin: 1234,
-//                 },
-//             })
-//         );
-//     } else {
-//         console.log(`Client ${userId} not connected`);
+// try these for manual client testing
+// message = {
+//     operation: "setUser",
+//     data: {
+//         refId: "123456",
 //     }
-// }, 30000);
+// }
 
-export default {wss, clients};
+export default { wss, clients };

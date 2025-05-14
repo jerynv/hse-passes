@@ -132,7 +132,7 @@ class ScheduleData {
   ScheduleData({
     this.active = true,
     this.period = 'start',
-    this.day = 2,
+    this.day = 1,
     this.percentage = .11,
     this.lunch = 'a',
     this.periodicTimer = '00:00:00',
@@ -156,7 +156,7 @@ class Schedule {
   void startPeriodicTimer() {
     //every .50 seconds call this function
     Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      if (test == _secondsFromTime([24, 00, 0])) {
+      if (test >= _secondsFromTime([15, 00, 0])) {
         test = _secondsFromTime([8, 00, 0]);
       }
       test = test + 1;
@@ -166,7 +166,7 @@ class Schedule {
       DateTime now = DateTime.now();
       List<int> time = [now.hour, now.minute, now.second];
       int seconds = _secondsFromTime(time);
-      // int seconds = test;
+      //int seconds = test;
       //from list find where seconds is greater than or equal to a key value while being less than the next key value if it exists
       //second element should be the next key value if it exists
 
@@ -282,12 +282,18 @@ int _secondsFromTime(List<int> time) {
 }
 
 String getCurrentPeriod() {
+  bool isNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return double.tryParse(s) != null;
+  }
+
+  int day = 2;
   DateTime now = DateTime.now();
   List<int> time = [now.hour, now.minute, now.second];
   time = [9, 23, 3];
   int seconds = _secondsFromTime(time);
- 
-
 
   int key = periodMap.keys.firstWhere(
     (key) {
@@ -301,5 +307,17 @@ String getCurrentPeriod() {
     },
   );
   Map<String, String>? period = periodMap[key]!;
-  return period['period']!;
+
+  final List<String> periodsForDayOne = ["1", "2", "3", "4"];
+  final List<String> periodsForDayTwo = ["5", "6", "7", "P"];
+
+  if (isNumeric(period['period']!)) {
+    if (day == 1) {
+      return periodsForDayOne[int.parse(period['period']!) - 1];
+    } else {
+      return periodsForDayTwo[int.parse(period['period']!) - 1];
+    }
+  } else {
+    return "2";
+  }
 }

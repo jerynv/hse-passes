@@ -33,6 +33,7 @@ Color opaque_white_text = Colors.white.withOpacity(.5);
 
 //main color
 Color main_color = Colors.blueAccent;
+// Color main_color = Colors.redAccent;
 Color main_color_dark = Colors.black;
 
 Color main_container_color_dark = const Color.fromARGB(255, 15, 15, 15);

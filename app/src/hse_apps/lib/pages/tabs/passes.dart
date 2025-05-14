@@ -22,9 +22,7 @@ class _PassesTabState extends State<PassesTab> {
   final incomingScrollController = ScrollController();
   final activeScrollController = ScrollController();
   // Mock Data for Active Passes
-  List<ActivePass> activePasses = [
-    ActivePass('Math Class', '8:30 - 9:57', false)
-  ];
+  ActivePass activePass = ActivePass('Math Class', '8:30 - 9:57', false);
 
   String _formatTime(TimeOfDay time) {
     // Converts TimeOfDay to a string with AM/PM format
@@ -32,13 +30,9 @@ class _PassesTabState extends State<PassesTab> {
     return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
   }
 
-  void acceptRequest(int index, TimeOfDay time) {
-    
-  }
+  void acceptRequest(int index, TimeOfDay time) {}
 
-  void rejectRequest(int index) {
-    
-  }
+  void rejectRequest(int index) {}
 
   void updateCurrentPeriod() {
     var period = getCurrentPeriod();
@@ -51,7 +45,7 @@ class _PassesTabState extends State<PassesTab> {
 
     debugPrint("Current period: $period");
 
-    if (period != activePasses[0].destination) {
+    if (period != activePass.destination) {
       // Check if the new period is in the map
       if (period.toLowerCase() == "passing") {
         // If the period is "passing", set the current period to "passing"
@@ -67,10 +61,14 @@ class _PassesTabState extends State<PassesTab> {
         text = "Lunch";
       } else {
         // If not, set the current period to "unknown"
-        text = Auth.userData['ClassInfo'][period]["className"];
+        final classInfo = Auth.userData?['ClassInfo'];
+        final periodInfo = classInfo != null ? classInfo[period] : null;
+        text = periodInfo != null
+            ? periodInfo["className"] ?? "Unknown"
+            : "Unknown";
       }
       setState(() {
-        activePasses[0].destination = text;
+        activePass.destination = text;
       });
     }
   }
@@ -80,6 +78,7 @@ class _PassesTabState extends State<PassesTab> {
     super.initState();
 
     //every 5 seconds check for the current period
+    WebSocketProvider.setUpdateFunction(updateCurrentPeriod);
     updateCurrentPeriod();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       disposed ? timer.cancel() : updateCurrentPeriod();
@@ -133,11 +132,20 @@ class _PassesTabState extends State<PassesTab> {
             child: Container(
               //min height to prevent overflow
               padding: const EdgeInsets.all(5),
-              constraints: const BoxConstraints(minHeight: 150, maxHeight: 370),
+              constraints: const BoxConstraints(minHeight: 120, maxHeight: 370),
 
               width: double.infinity,
               decoration: BoxDecoration(
-                color: main_color,
+                gradient: LinearGradient(
+                  colors: [
+                    main_color,
+                    main_color.withOpacity(.9),
+                    main_color.withOpacity(.2),
+                  ],
+                  tileMode: TileMode.decal,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -157,14 +165,55 @@ class _PassesTabState extends State<PassesTab> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Good $timeOfDay, ${Auth.userData['first_name'] ?? 'first'} ${Auth.userData['last_name'] ?? 'last'}',
+                      'Good $timeOfDay, ${Auth.userData?['First_Name'] ?? 'first'} ${Auth.userData?['Last_Name'] ?? 'last'}',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    activePasses.isNotEmpty
+                    Text(
+                      'Current Class',
+                      style: TextStyle(fontSize: 14, color: opaque_white_text),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.only(bottom: 10, right: 10),
+                      decoration: BoxDecoration(
+                        color: brightness == Brightness.dark
+                            ? Colors.grey[900]
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            activePass.destination.length > 20
+                                ? activePass.destination.substring(0, 22) +
+                                    '...'
+                                : activePass.destination,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          ),
+                          Text(
+                            activePass.date,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: brightness == Brightness.dark
+                                  ? secondary_text_color_dark
+                                  : secondary_text_color_dark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    WebSocketProvider.currentPasses.isNotEmpty
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -195,7 +244,8 @@ class _PassesTabState extends State<PassesTab> {
                                               const EdgeInsets.only(right: 10),
                                           child: Column(
                                             children: [
-                                              for (var pass in activePasses)
+                                              for (var pass in WebSocketProvider
+                                                  .currentPasses)
                                                 Container(
                                                   padding:
                                                       const EdgeInsets.all(10),
@@ -216,7 +266,15 @@ class _PassesTabState extends State<PassesTab> {
                                                             .spaceBetween,
                                                     children: [
                                                       Text(
-                                                        pass.destination,
+                                                        pass["Destination"]
+                                                                    .length >
+                                                                20
+                                                            ? pass["Destination"]
+                                                                    .substring(
+                                                                        0, 22) +
+                                                                '...'
+                                                            : pass[
+                                                                "Destination"],
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           color: brightness ==
@@ -227,7 +285,7 @@ class _PassesTabState extends State<PassesTab> {
                                                         ),
                                                       ),
                                                       Text(
-                                                        pass.date,
+                                                        "${DateTime.fromMillisecondsSinceEpoch(pass["PassTime"]).toLocal().hour}:${DateTime.fromMillisecondsSinceEpoch(pass["PassTime"]).toLocal().minute.toString().padLeft(2, '0')}",
                                                         style: TextStyle(
                                                           fontSize: 14,
                                                           color: brightness ==
@@ -247,16 +305,14 @@ class _PassesTabState extends State<PassesTab> {
                             ],
                           )
                         : Container(
-                            height: MediaQuery.of(context).size.height * 0.1,
+                            height: 40,
                             width: double.infinity,
                             alignment: Alignment.center,
                             child: Text(
-                              'You have no active',
+                              'no active passes',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: brightness == Brightness.dark
-                                    ? secondary_text_color_dark
-                                    : secondary_text_color,
+                                color: Colors.white.withOpacity(0.8),
                               ),
                             ),
                           ),
@@ -279,7 +335,7 @@ class _PassesTabState extends State<PassesTab> {
             ),
           ),
           const SizedBox(height: 10),
-          WebSocketProvider.passRequests.isNotEmpty
+          WebSocketProvider.incomingPassRequests.isNotEmpty
               ? Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 10),
@@ -296,7 +352,7 @@ class _PassesTabState extends State<PassesTab> {
                             parent: AlwaysScrollableScrollPhysics()),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:  WebSocketProvider.passRequests
+                          children: WebSocketProvider.incomingPassRequests
                               .map((request) => Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
@@ -307,7 +363,8 @@ class _PassesTabState extends State<PassesTab> {
                                         ),
                                         child: ListTile(
                                           //if first item top pading is 0
-                                          contentPadding:  WebSocketProvider.passRequests
+                                          contentPadding: WebSocketProvider
+                                                      .incomingPassRequests
                                                       .indexOf(request) ==
                                                   0
                                               ? const EdgeInsets.only(
@@ -324,7 +381,7 @@ class _PassesTabState extends State<PassesTab> {
                                             backgroundColor:
                                                 main_color.withOpacity(0.2),
                                             child: Icon(
-                                              request.icon,
+                                              Icons.mail_rounded,
                                               color: main_color,
                                             ),
                                           ),
@@ -341,8 +398,30 @@ class _PassesTabState extends State<PassesTab> {
                                                 onPressed: () {
                                                   _show_request_modal(
                                                       context,
-                                                      request,
-                                                       WebSocketProvider.passRequests
+                                                      PassRequest(
+                                                          classUUID: request[
+                                                              "CurrentClassUUID"],
+                                                          passUUID:
+                                                              request["PassId"],
+                                                          teacher: request[
+                                                              "SenderName"],
+                                                          passType: int.tryParse(
+                                                                      request[
+                                                                          "PassType"]) !=
+                                                                  null
+                                                              ? 'Assistance Request'
+                                                              : request[
+                                                                  "PassType"],
+                                                          requestedAt:
+                                                              "${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().hour}:${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().minute.toString().padLeft(2, '0')}",
+                                                          expiresAt:
+                                                              "${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().add(const Duration(minutes: 15)).hour}:${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().add(const Duration(minutes: 15)).minute.toString().padLeft(2, '0')}",
+                                                          time: DateTime.now()
+                                                              .toString(),
+                                                          icon: Icons
+                                                              .access_time),
+                                                      WebSocketProvider
+                                                          .incomingPassRequests
                                                           .indexOf(request));
                                                 },
                                                 child: const Text(
@@ -358,7 +437,8 @@ class _PassesTabState extends State<PassesTab> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(request.teacher,
+                                                Text(
+                                                    request["SenderName"] ?? '',
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       color: brightness ==
@@ -366,7 +446,7 @@ class _PassesTabState extends State<PassesTab> {
                                                           ? Colors.white
                                                           : Colors.black,
                                                     )),
-                                                Text(request.passType,
+                                                Text(request["PassType"],
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       color: brightness ==
@@ -380,8 +460,12 @@ class _PassesTabState extends State<PassesTab> {
                                           onTap: () {},
                                         ),
                                       ),
-                                      ( WebSocketProvider.passRequests.indexOf(request) ==
-                                               WebSocketProvider.passRequests.length - 1)
+                                      (WebSocketProvider.incomingPassRequests
+                                                  .indexOf(request) ==
+                                              WebSocketProvider
+                                                      .incomingPassRequests
+                                                      .length -
+                                                  1)
                                           ? const SizedBox(height: 20)
                                           : Padding(
                                               padding: const EdgeInsets.only(
@@ -432,6 +516,8 @@ class PassRequest {
   final String time;
   final bool urgent;
   final IconData icon;
+  final String classUUID;
+  final String passUUID;
 
   PassRequest({
     required this.teacher,
@@ -442,6 +528,8 @@ class PassRequest {
     this.urgent = false,
     required this.time,
     required this.icon,
+    required this.classUUID,
+    required this.passUUID,
   });
 }
 

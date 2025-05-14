@@ -33,15 +33,12 @@ class _ClassTabState extends State<ClassTab> {
     return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
   }
 
-  void acceptRequest(int index, TimeOfDay time) {
-    
-  }
+  void acceptRequest(int index, TimeOfDay time) {}
 
-  void rejectRequest(int index) {
-    
-  }
+  void rejectRequest(int index) {}
 
   void updateCurrentPeriod() {
+    if (disposed) return;
     var period = getCurrentPeriod();
     late String text;
     var newPeriodMap = {
@@ -68,7 +65,13 @@ class _ClassTabState extends State<ClassTab> {
         text = "Lunch";
       } else {
         // If not, set the current period to "unknown"
-        text = Auth.userData['ClassInfo'][period]["className"];
+        try {
+          final classInfo = Auth.userData?['ClassInfo'];
+          final periodInfo = classInfo != null ? classInfo[period] : null;
+          text = periodInfo != null
+              ? periodInfo["className"] ?? "Unknown"
+              : "Unknown";
+        } catch (e) {}
       }
       setState(() {
         activePasses[0].destination = text;
@@ -80,7 +83,7 @@ class _ClassTabState extends State<ClassTab> {
   void initState() {
     super.initState();
 
-    //every 5 seconds check for the current period
+    WebSocketProvider.setUpdateFunction(updateCurrentPeriod);
     updateCurrentPeriod();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       disposed ? timer.cancel() : updateCurrentPeriod();
@@ -138,7 +141,16 @@ class _ClassTabState extends State<ClassTab> {
 
               width: double.infinity,
               decoration: BoxDecoration(
-                color: main_color,
+                gradient: LinearGradient(
+                  colors: [
+                    main_color.withOpacity(.4),
+                    main_color,
+                    main_color.withOpacity(.9),
+                  ],
+                  tileMode: TileMode.decal,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -158,7 +170,7 @@ class _ClassTabState extends State<ClassTab> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Good $timeOfDay, ${Auth.userData['first_name'] ?? 'first'} ${Auth.userData['last_name'] ?? 'last'}',
+                      'Good $timeOfDay, ${Auth.userData?['First_Name'] ?? 'first'} ${Auth.userData?['Last_Name'] ?? 'last'}',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
@@ -217,7 +229,14 @@ class _ClassTabState extends State<ClassTab> {
                                                             .spaceBetween,
                                                     children: [
                                                       Text(
-                                                        pass.destination,
+                                                        pass.destination
+                                                                    .length >
+                                                                20
+                                                            ? pass.destination
+                                                                    .substring(
+                                                                        0, 22) +
+                                                                '...'
+                                                            : pass.destination,
                                                         style: TextStyle(
                                                           fontSize: 16,
                                                           color: brightness ==
@@ -248,11 +267,12 @@ class _ClassTabState extends State<ClassTab> {
                             ],
                           )
                         : Container(
-                            height: MediaQuery.of(context).size.height * 0.1,
+                            height: 10,
                             width: double.infinity,
                             alignment: Alignment.center,
+                            color: Colors.white,
                             child: Text(
-                              'You have no active',
+                              'You have no active d',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: brightness == Brightness.dark
@@ -280,7 +300,7 @@ class _ClassTabState extends State<ClassTab> {
             ),
           ),
           const SizedBox(height: 10),
-          WebSocketProvider.passRequests.isNotEmpty
+          WebSocketProvider.incomingPassRequests.isNotEmpty
               ? Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 10),
@@ -297,7 +317,7 @@ class _ClassTabState extends State<ClassTab> {
                             parent: AlwaysScrollableScrollPhysics()),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:  WebSocketProvider.passRequests
+                          children: WebSocketProvider.incomingPassRequests
                               .map((request) => Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
@@ -308,7 +328,8 @@ class _ClassTabState extends State<ClassTab> {
                                         ),
                                         child: ListTile(
                                           //if first item top pading is 0
-                                          contentPadding:  WebSocketProvider.passRequests
+                                          contentPadding: WebSocketProvider
+                                                      .incomingPassRequests
                                                       .indexOf(request) ==
                                                   0
                                               ? const EdgeInsets.only(
@@ -325,7 +346,7 @@ class _ClassTabState extends State<ClassTab> {
                                             backgroundColor:
                                                 main_color.withOpacity(0.2),
                                             child: Icon(
-                                              request.icon,
+                                              Icons.mail_rounded,
                                               color: main_color,
                                             ),
                                           ),
@@ -342,8 +363,29 @@ class _ClassTabState extends State<ClassTab> {
                                                 onPressed: () {
                                                   _show_request_modal(
                                                       context,
-                                                      request as PassRequest,
-                                                       WebSocketProvider.passRequests
+                                                      PassRequest(
+                                                          passUUID: request[
+                                                              "PassId"],
+                                                          classUUID: request[
+                                                              "CurrentClassUUID"],
+                                                          teacher: request[
+                                                              "SenderName"],
+                                                          passType: request[
+                                                                      "PassType"] ==
+                                                                  num
+                                                              ? 'Assistance Request'
+                                                              : request[
+                                                                  "PassType"],
+                                                          requestedAt:
+                                                              "${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().hour}:${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().minute.toString().padLeft(2, '0')}",
+                                                          expiresAt:
+                                                              "${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().add(const Duration(minutes: 15)).hour}:${DateTime.fromMillisecondsSinceEpoch(request["PassTime"]).toLocal().add(const Duration(minutes: 15)).minute.toString().padLeft(2, '0')}",
+                                                          time: DateTime.now()
+                                                              .toString(),
+                                                          icon: Icons
+                                                              .access_time),
+                                                      WebSocketProvider
+                                                          .incomingPassRequests
                                                           .indexOf(request));
                                                 },
                                                 child: const Text(
@@ -359,7 +401,8 @@ class _ClassTabState extends State<ClassTab> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(request.teacher,
+                                                Text(
+                                                    request["SenderName"] ?? '',
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       color: brightness ==
@@ -367,7 +410,12 @@ class _ClassTabState extends State<ClassTab> {
                                                           ? Colors.white
                                                           : Colors.black,
                                                     )),
-                                                Text(request.passType,
+                                                Text(
+                                                    int.tryParse(request[
+                                                                "PassType"]) !=
+                                                            null
+                                                        ? 'Assistance Request'
+                                                        : request["PassType"],
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       color: brightness ==
@@ -381,8 +429,12 @@ class _ClassTabState extends State<ClassTab> {
                                           onTap: () {},
                                         ),
                                       ),
-                                      ( WebSocketProvider.passRequests.indexOf(request) ==
-                                               WebSocketProvider.passRequests.length - 1)
+                                      (WebSocketProvider.incomingPassRequests
+                                                  .indexOf(request) ==
+                                              WebSocketProvider
+                                                      .incomingPassRequests
+                                                      .length -
+                                                  1)
                                           ? const SizedBox(height: 20)
                                           : Padding(
                                               padding: const EdgeInsets.only(
@@ -424,7 +476,6 @@ class _ClassTabState extends State<ClassTab> {
 }
 // Data Classes
 // Removed local PassRequest class to use the shared one from passes.dart
-
 
 class ActivePass {
   String _destination;

@@ -51,7 +51,7 @@ class SettingsTabState extends State<ErrorTab> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                 },
                 child: const Text(
                   'OK',

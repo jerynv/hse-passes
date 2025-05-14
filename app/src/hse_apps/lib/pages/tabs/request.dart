@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:hse_apps/functions/Schedule.dart';
 import 'package:hse_apps/functions/auth.dart';
 import 'package:hse_apps/functions/ws.dart';
 import 'package:hse_apps/theme/theme.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
 class RequestsTab extends StatefulWidget {
   const RequestsTab({super.key});
@@ -15,325 +19,409 @@ class RequestsTab extends StatefulWidget {
 }
 
 class RequestState extends State<RequestsTab> {
-  final List<PassType> passTypes = [
-    PassType(
-      icon: Icons.wc,
-      description: 'Bathroom',
-      assName: '[Teacher\'s Name]',
-    ),
-    PassType(
-      icon: Icons.local_drink_outlined,
-      description: 'Water',
-      assName: '[Teacher\'s Name]',
-    ),
-    PassType(
-      icon: Icons.directions_walk,
-      description: 'Hall Pass',
-      assName: '[Teacher\'s Name]',
-    ),
-    // Subject-Specific Pass Types
-    PassType(
-      icon: Icons.computer,
-      description: 'Library Pass',
-      assName: 'Librarian',
-    ),
-    PassType(
-      icon: Icons.science,
-      description: 'Science Lab',
-      assName: '[Science Teacher\'s Name]',
-    ),
-    PassType(
-      icon: Icons.palette,
-      description: 'Art Room',
-      assName: '[Art Teacher\'s Name]',
-    ),
-    PassType(
-      icon: Icons.music_note,
-      description: 'Music Room',
-      assName: '[Music Teacher\'s Name]',
-    ),
-
-    // Special Needs Pass Types
-    PassType(
-      icon: Icons.local_hospital,
-      description: 'Nurse',
-      assName: '[Nurse\'s Name]',
-    ),
-    PassType(
-      icon: Icons.account_box,
-      description: 'Guidance',
-      assName: '[Counselor\'s Name]',
-    ),
-    PassType(
-      icon: Icons.accessibility,
-      description: 'Special Ed',
-      assName: '[Special Education Teacher\'s Name]',
-    ),
-
-    // Administrative Pass Types
-    PassType(
-      icon: Icons.school,
-      description: 'Principal\'s Office',
-      assName: '[Principal\'s Name]',
-    ),
-    PassType(
-      icon: Icons.mail,
-      description: 'Office Pass',
-      assName: '[Office Staff Name]',
-    ),
-  ];
-  List<PassType> filteredPassTypes = [];
+  List<dynamic> filteredPasses = [];
+  Timer? dis;
 
   final FocusNode _focusNode = FocusNode();
   bool _isInputFocused = false;
+  List<dynamic?> outgoingPassRequest = [];
+
+  void init() {
+    debugPrint('hi there');
+    WebSocketProvider.setUpdateFunction(() {
+      setState(() {
+        outgoingPassRequest = WebSocketProvider.outgoingPassRequest;
+      });
+    });
+    outgoingPassRequest = WebSocketProvider.outgoingPassRequest;
+  }
 
   @override
   void initState() {
     super.initState();
-    filteredPassTypes = passTypes;
-
-    // Add listener to update focus state
+    init();
     _focusNode.addListener(() {
       setState(() {
         _isInputFocused = _focusNode.hasFocus;
       });
     });
+    filteredPasses = WebSocketProvider.passPresets;
+    //if passPresets is empty, retry after 2 sconds until it isnt
+    if (WebSocketProvider.passPresets.isEmpty) {
+      dis = Timer.periodic(const Duration(seconds: 2), (timer) {
+        if (WebSocketProvider.passPresets.isEmpty) {
+          filteredPasses = WebSocketProvider.passPresets;
+          timer.cancel();
+        }
+      });
+    }
   }
 
   void filterPassTypes(String query) {
-    setState(() {
-      filteredPassTypes = passTypes
-          .where((passType) =>
-              passType.description
-                  .toLowerCase()
-                  .contains(query.toLowerCase()) ||
-              passType.assName.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
+    //map websocket.teachers to the passname and description by name being The id and description being the name
+
+    List<dynamic> searchableTeachers = WebSocketProvider.teachers
+        .map((teacher) => {
+              "Description": teacher['TeacherName'],
+              "Name": teacher['TeacherId'],
+            })
+        .toList();
+    filteredPasses = WebSocketProvider.passPresets
+            .where((passType) =>
+                passType['Description']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                passType['Name'].toLowerCase().contains(query.toLowerCase()))
+            .toList() +
+        searchableTeachers
+            .where((passType) =>
+                passType['Description']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                passType['Name'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
+
+    setState(() {});
   }
 
   @override
   void dispose() {
     _focusNode.dispose(); // Dispose of the FocusNode
     super.dispose();
+    if (dis != null) {
+      dis!.cancel();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-
-    return Scaffold(
-      backgroundColor:
-          brightness == Brightness.dark ? main_color_dark : Colors.grey[100],
-      body: Column(
+    double safeAreaTop = 70;
+    int timeHour = TimeOfDay.now().hour;
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    String timeOfDay = timeHour < 12
+        ? 'morning'
+        : timeHour < 17
+            ? 'afternoon'
+            : 'evening';
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: safeAreaTop,
+        bottom: 0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: _isInputFocused ? 50 : 400,
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  height: 300,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: _isInputFocused ? Colors.transparent : main_color,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(25),
-                      bottomRight: Radius.circular(25),
-                    ),
-                  ),
-                  child: Padding(
-                      padding:
-                          const EdgeInsets.only(left: 30.0, top: 70, right: 30),
-                      child: RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Request a Pass ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 50,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Icon(Icons.arrow_downward,
-                                  color: Colors.white, size: 50),
-                            ),
-                          ],
-                        ),
-                      )),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(25),
-                        child: Container(
-                          height: 160, //
-                          decoration: BoxDecoration(
-                            color: _isInputFocused
-                                ? Colors.transparent
-                                : Brightness.dark == brightness
-                                    ? main_container_color_dark
-                                    : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Brightness.dark == brightness
-                                    ? Colors.grey.withOpacity(0.05)
-                                    : Colors.grey.withOpacity(0.2),
-                                spreadRadius: 4,
-                                blurRadius: 20,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              "No Outgoing Passes",
-                              style: TextStyle(
-                                color: _isInputFocused
-                                    ? Colors.transparent
-                                    : Brightness.dark == brightness
-                                        ? Colors.white
-                                        : Colors.black,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ),
+          _isInputFocused
+              ? Container()
+              : Column(
+                  children: [
+                    Text(
+                      'Request Passes',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.grey,
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Pass Details",
-                  style: TextStyle(
-                    color: secondary_text_color,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Material(
-                  elevation: 1,
-                  borderRadius: const BorderRadius.all(Radius.circular(30)),
-                  color: Colors.transparent,
-                  child: TextField(
-                    focusNode: _focusNode, // Attach the focus node
-                    onChanged: filterPassTypes,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.all(5),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(
-                          color: Colors.transparent,
-                        ),
-                      ),
-                      fillColor: Brightness.dark == brightness
-                          ? main_container_color_dark
-                          : Colors.white,
-                      filled: true,
-                      focusColor: Brightness.dark == brightness
-                          ? Colors.black
-                          : Colors.white,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: secondary_text_color,
-                      ),
-                      hintText: 'Search',
-                      hintStyle: TextStyle(
-                        color: secondary_text_color,
+                    Text(
+                      (Auth.userData?["First_Name"] ?? 'First') +
+                          (' ' + Auth.userData?["Last_Name"] ?? 'Last'),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
+                  ],
+                ),
+          const SizedBox(height: 20),
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            clipBehavior: Clip.antiAlias,
+            child: TextField(
+              onChanged: (e) {
+                filterPassTypes(e);
+              },
+              focusNode: _focusNode,
+              textAlignVertical: TextAlignVertical.top,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintStyle: const TextStyle(
+                  color: Colors.grey,
+                ),
+                hintText: 'Search pass...',
+                prefixIconConstraints:
+                    const BoxConstraints(maxHeight: double.infinity),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 10),
+                  child: Icon(
+                    FluentIcons.search_28_regular,
+                    color: _isInputFocused ? main_color : Colors.grey,
                   ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: filteredPassTypes
-                      .map((passType) => Column(
-                            children: [
-                              ListTile(
-                                contentPadding: const EdgeInsets.all(10),
-                                leading: CircleAvatar(
-                                  backgroundColor: main_color.withOpacity(0.2),
-                                  child: Icon(
-                                    passType.icon,
-                                    color: main_color,
-                                  ),
-                                ),
-                                trailing: Container(
-                                  width: 90,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: main_color.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: TextButton(
-                                      onPressed: () {
-                                        WebSocketProvider.send(jsonEncode({
-                                          "Operation": "SendPassRequest",
-                                          "Data": {
-                                            "id": Auth.loginId,
-                                            "token": Auth.loginBearerToken,
-                                            "PassType": passType.description,
-                                            "PassName": passType.assName,
-                                          }
-                                        }));
-                                      },
-                                      child: const Text(
-                                        'Request',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )),
-                                ),
-                                title: Text(
-                                  passType.description,
-                                  style: TextStyle(
-                                    color: secondary_text_color,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Divider(
-                                color: brightness == Brightness.dark
-                                    ? Colors.grey[900]
-                                    : Colors.grey[300],
-                                height: 1,
-                              ),
-                            ],
-                          ))
-                      .toList(),
-                ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? main_color.withOpacity(.2)
+                    : main_color.withOpacity(.1),
               ),
             ),
           ),
+          _isInputFocused
+              ? Container()
+              : Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                  //height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        main_color,
+                        main_color.withOpacity(.9),
+                        main_color.withOpacity(.2),
+                      ],
+                      tileMode: TileMode.decal,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RichText(
+                          text: TextSpan(
+                        text: 'You Have',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white.withOpacity(.8),
+                        ),
+                        children: [
+                          TextSpan(
+                            text:
+                                ' ${outgoingPassRequest.isNotEmpty ? '${outgoingPassRequest.length} Outgoing ${outgoingPassRequest.length > 1 ? "Passes" : "Pass"}' : 'No Outgoing Passes'}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      )),
+                      outgoingPassRequest.isNotEmpty
+                          //create text for each pass outgoing request
+                          ? Column(
+                              children: [
+                                for (var pass in outgoingPassRequest)
+                                  //return list of passes
+                                  Container(
+                                    //with blury backdrop
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(.2),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    margin: const EdgeInsets.only(top: 10),
+                                    padding: const EdgeInsets.all(10),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          pass?['PassName'],
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              DateTime.fromMillisecondsSinceEpoch(
+                                                          pass?['PassTime'])
+                                                      .toLocal()
+                                                      .hour
+                                                      .toString() +
+                                                  ':' +
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                          pass?['PassTime'])
+                                                      .toLocal()
+                                                      .minute
+                                                      .toString()
+                                                      .padLeft(2, '0'),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            InkWell(
+                                              splashColor: Colors.red,
+                                              
+                                              splashFactory:
+                                                  InkSplash.splashFactory,
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                debugPrint(
+                                                    'cancel pass request');
+                                              },
+                                              child: Container(
+                                              
+                                                color: Colors.white.withOpacity(.2),
+
+                                                child: Icon(
+                                                  Icons.close,
+                                                  size: 10,
+                                                  color: Colors.white
+                                                      .withOpacity(.8),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 5),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                              ],
+                            )
+                          : Container(),
+                    ],
+                  ),
+                ),
+          const SizedBox(height: 20),
+
+          //dynamic scrollable list of passes
+
+          Expanded(
+              child: ListView.builder(
+            itemCount: filteredPasses.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  if (int.tryParse(filteredPasses[index]['Name']) != null &&
+                      filteredPasses[index]['Name'].length == 7) {
+                    WebSocketProvider.send(json.encode({
+                      "Operation": "StudentPersonRequest",
+                      "Data": {
+                        "ClassUUID": Auth.userData?['Classes']
+                                [getCurrentPeriod()]
+                            .toString(),
+                        "Id": Auth.loginId.toString(),
+                        "SenderName": Auth.userData?['First_Name'] +
+                            ' ' +
+                            Auth.userData?['Last_Name'],
+                        "PassName": filteredPasses[index]['Description'],
+                        "PassType": 'Teacher Pass',
+                        "ReceiverId": filteredPasses[index]['Name'],
+                      }
+                    }));
+                    return;
+                  }
+                  debugPrint("dojdfnwfojwenfewjfonewjfn " +
+                      int.parse(getCurrentPeriod()).toString());
+                  WebSocketProvider.send(json.encode({
+                    "Operation": "SendPassRequest",
+                    "Data": {
+                      "ClassUUID": Auth.userData?['Classes'][getCurrentPeriod()]
+                          .toString(),
+                      "Id": Auth.loginId.toString(),
+                      "PassName": filteredPasses[index]['Description'],
+                      "PassType": filteredPasses[index]['Name'],
+                      //teacher id of current period
+                      "ReceiverId": Auth.userData?['ClassInfo']
+                          [getCurrentPeriod()]['TeacherId'],
+                    }
+                  }));
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(
+                    color:
+                        isDarkMode ? main_container_color_dark : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDarkMode
+                            ? Colors.white.withOpacity(.05)
+                            : Colors.grey.withOpacity(.1),
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        filteredPasses[index]['Description'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      //arrow icon inside small circle
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? main_color.withOpacity(.1)
+                              : main_color.withOpacity(.1),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.only(right: 5),
+                        child: Icon(
+                          FluentIcons.ios_arrow_rtl_24_regular,
+                          size: 15,
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(.8)
+                              : Colors.black.withOpacity(.3),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              );
+            },
+          )),
+
+          // for(var pass in filteredPasses)
+          //   Container(
+          //     margin: const EdgeInsets.only(bottom: 10),
+          //     padding: const EdgeInsets.all(10),
+          //     decoration: BoxDecoration(
+          //       color: isDarkMode
+          //           ? main_color.withOpacity(.2)
+          //           : main_color.withOpacity(.1),
+          //       borderRadius: BorderRadius.circular(10),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         Text(
+          //           pass?['Description'] ?? '',
+          //           style: TextStyle(
+          //             fontSize: 16,
+          //             fontWeight: FontWeight.w400,
+          //             color: isDarkMode ? Colors.white : Colors.black,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   )
         ],
       ),
     );
