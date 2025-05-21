@@ -691,30 +691,31 @@ async function setUser(ws, wsUsers, wsData) {
     //     return;
     // }
 
-    //
+    // ✅ ✅
     // console.log(`Setting user ID for client: ${userId}`);
     // clients.set(userId, ws);
     // ws.userId = userId;
     // ws.send(
     //     JSON.stringify({
-    //         Operation: "verifyIntegrity",
-    //         Data: { success: true },
+    //         operation: "verifyIntegrity",
+    //         data: { success: true },
     //     })
     // );
 
+    // 
     // ws.send(
     //     JSON.stringify({
-    //         Operation: "SetPassPresets",
-    //         Data: {
+    //         operation: "SetPassPresets",
+    //         data: {
     //             passPresets: await dumpPassPresets(),
     //         },
     //     })
     // );
     // ws.send(
     //     JSON.stringify({
-    //         Operation: "SetTeachers",
+    //         operation: "SetTeachers",
 
-    //         Data: {
+    //         data: {
     //             success: true,
     //             Teachers: await dumpTeacherInfoForStudents(userId),
     //         },
@@ -722,9 +723,9 @@ async function setUser(ws, wsUsers, wsData) {
     // );
     // ws.send(
     //     JSON.stringify({
-    //         Operation: "SetActivePasses",
+    //         operation: "SetActivePasses",
 
-    //         Data: {
+    //         data: {
     //             success: true,
     //             ActivePasses: await dumpActivePasses(userId),
     //         },
@@ -732,9 +733,9 @@ async function setUser(ws, wsUsers, wsData) {
     // );
     // ws.send(
     //     JSON.stringify({
-    //         Operation: "SetOutGoingRequests",
+    //         operation: "SetOutGoingRequests",
 
-    //         Data: {
+    //         data: {
     //             success: true,
     //             OutGoingRequests: await dumpOutGoingRequests(userId),
     //         },
@@ -744,8 +745,8 @@ async function setUser(ws, wsUsers, wsData) {
     //     console.log("pass dump pending passes for teachers");
     //     ws.send(
     //         JSON.stringify({
-    //             Operation: "PendingPassRequestDump",
-    //             Data: {
+    //             operation: "PendingPassRequestDump",
+    //             data: {
     //                 success: true,
     //                 passes: await dumpPendingPassesForTeachers(ws.userId),
     //             },
@@ -753,10 +754,10 @@ async function setUser(ws, wsUsers, wsData) {
     //     );
     //     ws.send(
     //         JSON.stringify({
-    //             Operation: "SetStudents",
-    //             Data: {
+    //             operation: "SetStudents",
+    //             data: {
     //                 success: true,
-    //                 Students: await dumpStudentInfoForTeachers(),
+    //                 students: await dumpStudentInfoForTeachers(),
     //             },
     //         })
     //     );
@@ -764,8 +765,8 @@ async function setUser(ws, wsUsers, wsData) {
     //     console.log("pass dump pending passes for students");
     //     ws.send(
     //         JSON.stringify({
-    //             Operation: "PendingPassRequestDump",
-    //             Data: {
+    //             operation: "PendingPassRequestDump",
+    //             data: {
     //                 success: true,
     //                 passes: await dumpPendingPassesForStudents(ws.userId),
     //             },
@@ -793,8 +794,15 @@ async function setUser(ws, wsUsers, wsData) {
     ws.userId = userId;
     //sends a message to the client to verify the connection
     wsSend(ws, userId, {
-        Operation: "verifyIntegrity",
-        Data: { success: true },
+        operation: "verifyIntegrity",
+        data: { success: true },
+    });
+
+    await wsSend(ws, userId, {
+        operation: "SetPassPresets",
+        data: {
+            passPresets: await dumpPassPresets(),
+        },
     });
 }
 

@@ -117,6 +117,7 @@ class RequestState extends State<RequestsTab> {
           _isInputFocused
               ? Container()
               : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Request Passes',
@@ -127,8 +128,9 @@ class RequestState extends State<RequestsTab> {
                       ),
                     ),
                     Text(
-                      (Auth.userData?["First_Name"] ?? 'First') +
-                          (' ' + Auth.userData?["Last_Name"] ?? 'Last'),
+                      (Auth.userData?["firstName"] ?? 'first') +
+                          // ignore: prefer_interpolation_to_compose_strings
+                          (' ' + (Auth.userData?["lastName"] ?? 'last')),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -265,7 +267,6 @@ class RequestState extends State<RequestsTab> {
                                             const SizedBox(width: 10),
                                             InkWell(
                                               splashColor: Colors.red,
-                                              
                                               splashFactory:
                                                   InkSplash.splashFactory,
                                               onTap: () {
@@ -274,9 +275,8 @@ class RequestState extends State<RequestsTab> {
                                                     'cancel pass request');
                                               },
                                               child: Container(
-                                              
-                                                color: Colors.white.withOpacity(.2),
-
+                                                color: Colors.white
+                                                    .withOpacity(.2),
                                                 child: Icon(
                                                   Icons.close,
                                                   size: 10,
@@ -308,38 +308,17 @@ class RequestState extends State<RequestsTab> {
               return GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  if (int.tryParse(filteredPasses[index]['Name']) != null &&
-                      filteredPasses[index]['Name'].length == 7) {
-                    WebSocketProvider.send(json.encode({
-                      "Operation": "StudentPersonRequest",
-                      "Data": {
-                        "ClassUUID": Auth.userData?['Classes']
-                                [getCurrentPeriod()]
-                            .toString(),
-                        "Id": Auth.loginId.toString(),
-                        "SenderName": Auth.userData?['First_Name'] +
-                            ' ' +
-                            Auth.userData?['Last_Name'],
-                        "PassName": filteredPasses[index]['Description'],
-                        "PassType": 'Teacher Pass',
-                        "ReceiverId": filteredPasses[index]['Name'],
-                      }
-                    }));
-                    return;
-                  }
-                  debugPrint("dojdfnwfojwenfewjfonewjfn " +
-                      int.parse(getCurrentPeriod()).toString());
                   WebSocketProvider.send(json.encode({
-                    "Operation": "SendPassRequest",
-                    "Data": {
-                      "ClassUUID": Auth.userData?['Classes'][getCurrentPeriod()]
+                    "operation": "SendPassRequest",
+                    "data": {
+                      "classUUID": Auth.userData?['classes'][getCurrentPeriod()]
                           .toString(),
-                      "Id": Auth.loginId.toString(),
-                      "PassName": filteredPasses[index]['Description'],
-                      "PassType": filteredPasses[index]['Name'],
+                      "refId": Auth.loginId.toString(),
+                      "passName": filteredPasses[index]['displayName'],
+                      "passType": filteredPasses[index]['Name'],
                       //teacher id of current period
-                      "ReceiverId": Auth.userData?['ClassInfo']
-                          [getCurrentPeriod()]['TeacherId'],
+                      "receiverId": Auth.userData?['classInfo']
+                          [getCurrentPeriod()]['teacherId'],
                     }
                   }));
                 },
@@ -365,7 +344,7 @@ class RequestState extends State<RequestsTab> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        filteredPasses[index]['Description'] ?? '',
+                        filteredPasses[index]['displayName'] ?? '',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -398,30 +377,6 @@ class RequestState extends State<RequestsTab> {
               );
             },
           )),
-
-          // for(var pass in filteredPasses)
-          //   Container(
-          //     margin: const EdgeInsets.only(bottom: 10),
-          //     padding: const EdgeInsets.all(10),
-          //     decoration: BoxDecoration(
-          //       color: isDarkMode
-          //           ? main_color.withOpacity(.2)
-          //           : main_color.withOpacity(.1),
-          //       borderRadius: BorderRadius.circular(10),
-          //     ),
-          //     child: Row(
-          //       children: [
-          //         Text(
-          //           pass?['Description'] ?? '',
-          //           style: TextStyle(
-          //             fontSize: 16,
-          //             fontWeight: FontWeight.w400,
-          //             color: isDarkMode ? Colors.white : Colors.black,
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   )
         ],
       ),
     );

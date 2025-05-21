@@ -276,7 +276,7 @@ class _PendingPassRequestModalState extends State<PendingPassRequestModal> {
                         onPressed: () async {
                           try {
                             WebSocketProvider.send(jsonEncode({
-                              "Operation": "AcceptPassRequest",
+                              "operation": "AcceptPassRequest",
                               "Data": {
                                 "PassId": widget.passRequest.passUUID,
                                 "ClassUUID": widget.passRequest.classUUID,

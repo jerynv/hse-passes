@@ -41,10 +41,10 @@ class WebSocketProvider extends ChangeNotifier {
           debugPrint('Received data: $data');
           if (data != null) {
             var jsonData = jsonDecode(data);
-            String operation = jsonData['Operation'];
+            String operation = jsonData['operation'];
             switch (operation) {
               case 'verifyIntegrity':
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   verified = true;
                   _update();
                   debugPrint('User verified');
@@ -52,9 +52,9 @@ class WebSocketProvider extends ChangeNotifier {
                 break;
               case 'PassRequest':
                 debugPrint('Pass request received');
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   debugPrint('Pass request success');
-                  var passRequest = jsonData['Data']["pass"];
+                  var passRequest = jsonData['data']["pass"];
                   debugPrint('Pass request: $passRequest');
                   incomingPassRequests.add(passRequest);
                   debugPrint('Pass request received: $passRequest');
@@ -65,15 +65,15 @@ class WebSocketProvider extends ChangeNotifier {
                 break;
               case 'SetPassPresets':
                 debugPrint('Pass presets received');
-                var passPresetsData = jsonData['Data']["passPresets"];
+                var passPresetsData = jsonData['data']["passPresets"];
                 debugPrint('Pass presets: $passPresetsData');
                 passPresets = passPresetsData;
                 break;
               case 'PassRequestResponse':
                 debugPrint('Pass request response received');
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   debugPrint('Pass request response success');
-                  var passRequestResponse = jsonData['Data']["pass"] as Map;
+                  var passRequestResponse = jsonData['data']["pass"] as Map;
                   debugPrint('Pass request response: $passRequestResponse');
                   outgoingPassRequest.add(passRequestResponse);
                   _update();
@@ -84,23 +84,23 @@ class WebSocketProvider extends ChangeNotifier {
               case 'SetTeachers':
                 debugPrint('Teachers received');
                 var teachersData =
-                    jsonData['Data']["Teachers"] as List<dynamic>;
+                    jsonData['data']["Teachers"] as List<dynamic>;
                 debugPrint('Teachers: $teachersData');
                 teachers = teachersData;
                 break;
               case 'SetStudents':
                 debugPrint('Students received');
                 var studentsData =
-                    jsonData['Data']["Students"] as List<dynamic>;
+                    jsonData['data']["Students"] as List<dynamic>;
                 debugPrint('Students: $studentsData');
                 students = studentsData;
                 break;
               case "PendingPassRequestDump":
                 debugPrint('Pending pass request dump received');
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   debugPrint('Pending pass request dump success');
                   var pendingPassRequestDump =
-                      jsonData['Data']["passes"] as List<dynamic>;
+                      jsonData['data']["passes"] as List<dynamic>;
                   debugPrint(
                       'Pending pass request dump: $pendingPassRequestDump');
                   incomingPassRequests = pendingPassRequestDump;
@@ -112,7 +112,7 @@ class WebSocketProvider extends ChangeNotifier {
               case 'SetActivePasses':
                 debugPrint('Active passes received');
                 var activePassesData =
-                    jsonData['Data']["ActivePasses"] as List<dynamic>;
+                    jsonData['data']["ActivePasses"] as List<dynamic>;
                 debugPrint('Active passes: $activePassesData');
                 currentPasses = activePassesData;
                 _update();
@@ -120,16 +120,16 @@ class WebSocketProvider extends ChangeNotifier {
               case 'SetOutGoingRequests':
                 debugPrint('Outgoing requests received');
                 var outgoingRequests =
-                    jsonData['Data']["OutGoingRequests"] as List<dynamic>;
+                    jsonData['data']["OutGoingRequests"] as List<dynamic>;
                 debugPrint('Outgoing requests: $outgoingRequests');
                 outgoingPassRequest = outgoingRequests;
                 break;
               case 'PassAcceptResponse':
                 debugPrint('Pass accept response received');
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   debugPrint(
                       'Pass accept response success' + jsonData.toString());
-                  var passAcceptResponse = jsonData['Data']["pass"] as Map;
+                  var passAcceptResponse = jsonData['data']["pass"] as Map;
                   var passId = passAcceptResponse["PassId"];
                   if (Auth.userData!["role"] == "Student") {
                     if (passAcceptResponse["SenderId"] == Auth.loginId) {
@@ -146,9 +146,9 @@ class WebSocketProvider extends ChangeNotifier {
                 break;
               case 'PassUpdate':
                 debugPrint('Pass update received');
-                if (jsonData['Data']["success"] == true) {
+                if (jsonData['data']["success"] == true) {
                   debugPrint('Pass update success');
-                  var passUpdate = jsonData['Data']["pass"] as Map;
+                  var passUpdate = jsonData['data']["pass"] as Map;
                   var passId = passUpdate["PassId"];
                   if (Auth.userData!["role"] == "Student") {
                     if (passUpdate["SenderId"] == Auth.loginId) {
@@ -173,12 +173,12 @@ class WebSocketProvider extends ChangeNotifier {
                 break;
               case 'ShowError':
                 debugPrint('Error received');
-                var erroTitle = jsonData['Data']["title"];
-                var errorMessage = jsonData['Data']["message"];
+                var errorTitle = jsonData['data']["title"];
+                var errorMessage = jsonData['data']["message"];
                 debugPrint('Error message: $errorMessage');
                 ShowErrorDialog(
                   _context()!,
-                  erroTitle,
+                  errorTitle,
                   errorMessage,
                   'OK',
                   Icons.error,

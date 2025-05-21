@@ -2,11 +2,13 @@ import * as fs from "fs";
 import { join } from "path";
 import { v4 } from "uuid";
 import * as argon2 from "argon2";
+import { log } from "console";
+import { logIt } from "./data.js";
 
 const __dirname = new URL(".", import.meta.url).pathname;
 
 export async function studentLogin(res, data) {
-    const { id, password } = data;
+    let { id, password } = data;
 
     if (!id || !password) {
         return res
@@ -32,7 +34,7 @@ export async function studentLogin(res, data) {
         return res.status(401).json({ error: "Invalid credentials SL-E001" });
     }
 
-    const isPasswordValid = await argon2.verify(user["Password"], password);
+    const isPasswordValid = await argon2.verify(user["password"], password);
 
     if (!isPasswordValid) {
         return res.status(401).json({ error: "Invalid credentials SL-E002" });
@@ -44,13 +46,19 @@ export async function studentLogin(res, data) {
 
     const token = v4();
     user = {
-        ClassInfo: await GetClassInfo(user["Classes"]),
+        classInfo: await GetClassInfo(user["classes"]),
         ...user,
     };
     //console.log(user);
-    const { Password, ...userWithoutPassword } = user;
+    //delete the 'password' from the user object
+    delete user["password"];
 
-    return res.json({ token, user: userWithoutPassword });
+    logIt(
+        `User ${id}, with name: ${user.firstName} ${user.lastName} successfully logged in`,
+        "log"
+    );
+    logIt(`Sending user id data: ${JSON.stringify(user, null, null)}`, "log");
+    return res.json({ token, user });
 }
 
 export async function TeacherLogin(res, data) {

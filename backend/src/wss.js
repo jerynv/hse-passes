@@ -51,7 +51,7 @@ wss.on("connection", (ws, req) => {
             formattedMessage = JSON.parse(message);
         } catch (e) {
             logIt(`Error parsing message: ${e.message}`, "error");
-            logic.wsSend(ws, 'unknown - ip: ' + ws._socket.remoteAddress, {
+            logic.wsSend(ws, "unknown - ip: " + ws._socket.remoteAddress, {
                 operation: "ShowError",
                 data: {
                     success: false,
@@ -62,7 +62,7 @@ wss.on("connection", (ws, req) => {
             return;
         }
 
-        logIt(`Received message: ${message}`);
+        logIt(`Received WS request: ${message}`);
 
         // ✅
         // if (
@@ -87,7 +87,7 @@ wss.on("connection", (ws, req) => {
             let clientMessage = new MessageTypeBasic(formattedMessage);
         } catch (e) {
             logIt(`Error validating message: ${e.message}`, "error");
-            logic.wsSend(ws, 'unknown - ip: ' + ws._socket.remoteAddress, {
+            logic.wsSend(ws, "unknown - ip: " + ws._socket.remoteAddress, {
                 operation: "ShowError",
                 data: {
                     success: false,
@@ -120,217 +120,218 @@ wss.on("connection", (ws, req) => {
         }
         return;
 
-        switch (FormattedMessage.Operation) {
-            case "setUser":
-                logic.setUser(ws, wss, FormattedMessage.Data);
-                break;
-            case "SendPassRequest":
-                console.log(`Received pass request from client ${ws.userId}`);
-                await savePassRequest(FormattedMessage.Data)
-                    .then((result) => {
-                        if (result.success) {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "PassRequestResponse",
-                                    Data: { success: true, pass: result.pass },
-                                })
-                            );
-                            clients.get(result.pass.ReceiverId)?.send(
-                                JSON.stringify({
-                                    Operation: "PassRequest",
-                                    Data: {
-                                        success: true,
-                                        pass: result.pass,
-                                        sender: getStudentInfo(
-                                            result.pass.SenderId
-                                        ),
-                                    },
-                                })
-                            );
-                        } else {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "ShowError",
-                                    Data: {
-                                        success: false,
-                                        title: "Error",
-                                        message: result.message,
-                                    },
-                                })
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error saving pass request:", error);
-                        ws.send(
-                            JSON.stringify({
-                                Operation: "PassRequestResponse",
-                                Data: { success: false },
-                            })
-                        );
-                    });
-                break;
-            case "TeacherPersonRequest":
-                await savePassRequestPerson(FormattedMessage.Data)
-                    .then((result) => {
-                        if (result.success) {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "PassRequestResponse",
-                                    Data: { success: true, pass: result.pass },
-                                })
-                            );
-                            clients.get(result.pass.ReceiverId)?.send(
-                                JSON.stringify({
-                                    Operation: "PassRequest",
-                                    Data: {
-                                        success: true,
-                                        pass: result.pass,
-                                        sender: getTeacherInfo(
-                                            result.pass.SenderId
-                                        ),
-                                    },
-                                })
-                            );
-                        } else {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "ShowError",
-                                    Data: {
-                                        success: false,
-                                        title: "Error",
-                                        message: result.message,
-                                    },
-                                })
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error saving pass request:", error);
-                        ws.send(
-                            JSON.stringify({
-                                Operation: "PassRequestResponse",
-                                Data: { success: false },
-                            })
-                        );
-                    });
+        // switch (FormattedMessage.Operation) {
+        //     case "setUser":  ✅ ✅
+        //         logic.setUser(ws, wss, FormattedMessage.Data);
+        //         break;
 
-                break;
-            case "StudentPersonRequest":
-                await savePassRequestPerson(FormattedMessage.Data)
-                    .then((result) => {
-                        if (result.success) {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "PassRequestResponse",
-                                    Data: { success: true, pass: result.pass },
-                                })
-                            );
-                            clients.get(result.pass.ReceiverId)?.send(
-                                JSON.stringify({
-                                    Operation: "PassRequest",
-                                    Data: {
-                                        success: true,
-                                        pass: result.pass,
-                                        sender: getStudentInfo(
-                                            result.pass.SenderId
-                                        ),
-                                    },
-                                })
-                            );
-                        } else {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "ShowError",
-                                    Data: {
-                                        success: false,
-                                        title: "Error",
-                                        message: result.message,
-                                    },
-                                })
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error saving pass request:", error);
-                        ws.send(
-                            JSON.stringify({
-                                Operation: "PassRequestResponse",
-                                Data: { success: false },
-                            })
-                        );
-                    });
-                break;
-            case "AcceptPassRequest":
-                console.log(`Accepting pass request from client ${ws.userId}`);
-                await AcceptPassRequest(FormattedMessage.Data)
-                    .then((result) => {
-                        if (result.success) {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "PassAcceptResponse",
-                                    Data: {
-                                        success: true,
-                                        pass: result.pass,
-                                    },
-                                })
-                            );
-                            for (let i = 0; i < result.notify.length; i++) {
-                                console.log(
-                                    `Notifying client ${result.notify[i]}`
-                                );
-                                if (clients.get(result.notify[i])) {
-                                    console.log(
-                                        `Client ${result.notify[i]} is connected`
-                                    );
-                                }
-                                clients.get(result.notify[i])?.send(
-                                    JSON.stringify({
-                                        Operation: "PassUpdate",
-                                        Data: {
-                                            success: true,
-                                            pass: result.pass,
-                                        },
-                                    })
-                                );
-                            }
-                        } else {
-                            ws.send(
-                                JSON.stringify({
-                                    Operation: "ShowError",
-                                    Data: {
-                                        success: false,
-                                        title: "Error",
-                                        message: result.message,
-                                    },
-                                })
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error accepting pass request:", error);
-                        ws.send(
-                            JSON.stringify({
-                                Operation: "PassRequestResponse",
-                                Data: { success: false },
-                            })
-                        );
-                    });
-                break;
-            default:
-                console.log(`Unknown operation: ${FormattedMessage.Operation}`);
-                ws.send(
-                    JSON.stringify({
-                        Operation: "ShowError",
-                        Data: {
-                            success: false,
-                            title: "Error",
-                            message: `Unknown operation: ${FormattedMessage.Operation}`,
-                        },
-                    })
-                );
-                break;
-        }
+        //     case "SendPassRequest":
+        //         console.log(`Received pass request from client ${ws.userId}`);
+        //         await savePassRequest(FormattedMessage.Data)
+        //             .then((result) => {
+        //                 if (result.success) {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequestResponse",
+        //                             Data: { success: true, pass: result.pass },
+        //                         })
+        //                     );
+        //                     clients.get(result.pass.ReceiverId)?.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequest",
+        //                             Data: {
+        //                                 success: true,
+        //                                 pass: result.pass,
+        //                                 sender: getStudentInfo(
+        //                                     result.pass.SenderId
+        //                                 ),
+        //                             },
+        //                         })
+        //                     );
+        //                 } else {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "ShowError",
+        //                             Data: {
+        //                                 success: false,
+        //                                 title: "Error",
+        //                                 message: result.message,
+        //                             },
+        //                         })
+        //                     );
+        //                 }
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error saving pass request:", error);
+        //                 ws.send(
+        //                     JSON.stringify({
+        //                         Operation: "PassRequestResponse",
+        //                         Data: { success: false },
+        //                     })
+        //                 );
+        //             });
+        //         break;
+        //     case "TeacherPersonRequest":
+        //         await savePassRequestPerson(FormattedMessage.Data)
+        //             .then((result) => {
+        //                 if (result.success) {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequestResponse",
+        //                             Data: { success: true, pass: result.pass },
+        //                         })
+        //                     );
+        //                     clients.get(result.pass.ReceiverId)?.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequest",
+        //                             Data: {
+        //                                 success: true,
+        //                                 pass: result.pass,
+        //                                 sender: getTeacherInfo(
+        //                                     result.pass.SenderId
+        //                                 ),
+        //                             },
+        //                         })
+        //                     );
+        //                 } else {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "ShowError",
+        //                             Data: {
+        //                                 success: false,
+        //                                 title: "Error",
+        //                                 message: result.message,
+        //                             },
+        //                         })
+        //                     );
+        //                 }
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error saving pass request:", error);
+        //                 ws.send(
+        //                     JSON.stringify({
+        //                         Operation: "PassRequestResponse",
+        //                         Data: { success: false },
+        //                     })
+        //                 );
+        //             });
+
+        //         break;
+        //     case "StudentPersonRequest":
+        //         await savePassRequestPerson(FormattedMessage.Data)
+        //             .then((result) => {
+        //                 if (result.success) {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequestResponse",
+        //                             Data: { success: true, pass: result.pass },
+        //                         })
+        //                     );
+        //                     clients.get(result.pass.ReceiverId)?.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassRequest",
+        //                             Data: {
+        //                                 success: true,
+        //                                 pass: result.pass,
+        //                                 sender: getStudentInfo(
+        //                                     result.pass.SenderId
+        //                                 ),
+        //                             },
+        //                         })
+        //                     );
+        //                 } else {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "ShowError",
+        //                             Data: {
+        //                                 success: false,
+        //                                 title: "Error",
+        //                                 message: result.message,
+        //                             },
+        //                         })
+        //                     );
+        //                 }
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error saving pass request:", error);
+        //                 ws.send(
+        //                     JSON.stringify({
+        //                         Operation: "PassRequestResponse",
+        //                         Data: { success: false },
+        //                     })
+        //                 );
+        //             });
+        //         break;
+        //     case "AcceptPassRequest":
+        //         console.log(`Accepting pass request from client ${ws.userId}`);
+        //         await AcceptPassRequest(FormattedMessage.Data)
+        //             .then((result) => {
+        //                 if (result.success) {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "PassAcceptResponse",
+        //                             Data: {
+        //                                 success: true,
+        //                                 pass: result.pass,
+        //                             },
+        //                         })
+        //                     );
+        //                     for (let i = 0; i < result.notify.length; i++) {
+        //                         console.log(
+        //                             `Notifying client ${result.notify[i]}`
+        //                         );
+        //                         if (clients.get(result.notify[i])) {
+        //                             console.log(
+        //                                 `Client ${result.notify[i]} is connected`
+        //                             );
+        //                         }
+        //                         clients.get(result.notify[i])?.send(
+        //                             JSON.stringify({
+        //                                 Operation: "PassUpdate",
+        //                                 Data: {
+        //                                     success: true,
+        //                                     pass: result.pass,
+        //                                 },
+        //                             })
+        //                         );
+        //                     }
+        //                 } else {
+        //                     ws.send(
+        //                         JSON.stringify({
+        //                             Operation: "ShowError",
+        //                             Data: {
+        //                                 success: false,
+        //                                 title: "Error",
+        //                                 message: result.message,
+        //                             },
+        //                         })
+        //                     );
+        //                 }
+        //             })
+        //             .catch((error) => {
+        //                 console.error("Error accepting pass request:", error);
+        //                 ws.send(
+        //                     JSON.stringify({
+        //                         Operation: "PassRequestResponse",
+        //                         Data: { success: false },
+        //                     })
+        //                 );
+        //             });
+        //         break;
+        //     default:
+        //         console.log(`Unknown operation: ${FormattedMessage.Operation}`);
+        //         ws.send(
+        //             JSON.stringify({
+        //                 Operation: "ShowError",
+        //                 Data: {
+        //                     success: false,
+        //                     title: "Error",
+        //                     message: `Unknown operation: ${FormattedMessage.Operation}`,
+        //                 },
+        //             })
+        //         );
+        //         break;
+        // }
     });
 
     ws.on("close", () => {
@@ -338,16 +339,15 @@ wss.on("connection", (ws, req) => {
     });
 });
 
+wss.on("listening", () => {
+    logIt(
+        `WebSocket server is running on ws://${wss.options.host}:${wss.options.port}`
+    );
+});
+
 wss.on("error", (error) => {
     console.error("WebSocket error:", error);
 });
-
-console.log(
-    "WebSocket server is running on ws://" +
-        wss.options.host +
-        ":" +
-        wss.options.port
-);
 
 // try these for manual client testing
 // message = {

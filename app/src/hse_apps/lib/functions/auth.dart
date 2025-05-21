@@ -69,8 +69,8 @@ class Auth {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'Operation': 'TeacherLogin',
-          "Data": {
+          'operation': 'TeacherLogin',
+          "data": {
             "id": id,
             "password": password,
           },

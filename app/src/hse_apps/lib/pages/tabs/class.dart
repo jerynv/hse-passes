@@ -66,7 +66,7 @@ class _ClassTabState extends State<ClassTab> {
       } else {
         // If not, set the current period to "unknown"
         try {
-          final classInfo = Auth.userData?['ClassInfo'];
+          final classInfo = Auth.userData?['classInfo'];
           final periodInfo = classInfo != null ? classInfo[period] : null;
           text = periodInfo != null
               ? periodInfo["className"] ?? "Unknown"

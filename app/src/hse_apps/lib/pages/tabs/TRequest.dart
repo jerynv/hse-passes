@@ -433,7 +433,7 @@ class TeacherRequestState extends State<TeacherRequestsTab> {
                   HapticFeedback.lightImpact();
 
                   WebSocketProvider.send(json.encode({
-                    "Operation": "TeacherPersonRequest",
+                    "operation": "TeacherPersonRequest",
                     "Data": {
                       "Id": Auth.loginId.toString(),
                       "ClassUUID": WebSocketProvider.students[classUuidIndex]

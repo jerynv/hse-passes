@@ -52,7 +52,7 @@ app.post("/api", (req, res) => {
 });
 
 server.listen(PORT, ip, () => {
-    console.log(`HTTP server is running on http://${ip}:${PORT}`);
+    logIt(`HTTP server is running on http://${ip}:${PORT}`);
 });
 server.on("error", (error) => {
     logIt("HTTP server error:" + error, "error");
@@ -61,7 +61,7 @@ server.on("close", () => {
     logIt("HTTP server is closing", "log");
 });
 server.on("clientError", (error, socket) => {
-    console.error("Client error:", error);
+    logIt("HTTP server client error:" + error, "error");
     socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
 });
 

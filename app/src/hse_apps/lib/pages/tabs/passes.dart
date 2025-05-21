@@ -61,7 +61,7 @@ class _PassesTabState extends State<PassesTab> {
         text = "Lunch";
       } else {
         // If not, set the current period to "unknown"
-        final classInfo = Auth.userData?['ClassInfo'];
+        final classInfo = Auth.userData?['classInfo'];
         final periodInfo = classInfo != null ? classInfo[period] : null;
         text = periodInfo != null
             ? periodInfo["className"] ?? "Unknown"
@@ -165,7 +165,7 @@ class _PassesTabState extends State<PassesTab> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Good $timeOfDay, ${Auth.userData?['First_Name'] ?? 'first'} ${Auth.userData?['Last_Name'] ?? 'last'}',
+                      'Good $timeOfDay, ${Auth.userData?['firstName'] ?? 'first'} ${Auth.userData?['lastName'] ?? 'last'}',
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,

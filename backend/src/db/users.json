@@ -1,11 +1,11 @@
 {
     "000000": {
-        "First_Name": "John",
-        "Last_Name": "Doe",
-        "Password": "argon2idv",
-        "Email": "",
-        "HasPickedClasses": false,
-        "Classes": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "password": "argon2idv",
+        "email": "",
+        "hasPickedClasses": false,
+        "classes": {
             "1": "uuid",
             "2": "uuid",
             "3": "uuid",
@@ -18,14 +18,14 @@
         }
     },
     "251378": {
-        "First_Name": "Jeryn",
-        "Last_Name": "Vicari",
+        "firstName": "Jeryn",
+        "lastName": "Vicari",
         "role": "Student",
-        "Password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
+        "password": "$argon2id$v=19$m=65536,t=3,p=4$QoOVJNEAfaR8wnqwl/UZDg$P1DvuRQkajMv11KHeMrsnP/YDmpUMuV+S4e0n9DwhHQ",
         "bearer": "",
-        "Email": "",
-        "HasPickedClasses": false,
-        "Classes": {
+        "email": "",
+        "hasPickedClasses": false,
+        "classes": {
             "1": "deb23be7-fb99-4ab1-879e-a822a48750eb",
             "2": "60fac22b-259a-4223-90a7-45db5b688832",
             "3": "420",
